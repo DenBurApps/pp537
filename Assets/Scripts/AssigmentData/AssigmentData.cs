@@ -12,8 +12,11 @@ namespace AssigmentData
         public string Date;
         public int TimeHr;
         public int TimeMin;
-
-        public AssigmentData(string name, string subject, string note, string date, int timeHr, int timeMin)
+        public IconType IconType;
+        public ColorType ColorType;
+        public bool IsSelected;
+        
+        public AssigmentData(string name, string subject, string note, string date, int timeHr, int timeMin, IconType iconType, ColorType colorType)
         {
             Name = name;
             Subject = subject;
@@ -21,6 +24,9 @@ namespace AssigmentData
             Date = date;
             TimeHr = timeHr;
             TimeMin = timeMin;
+            IconType = iconType;
+            ColorType = colorType;
+            IsSelected = false;
         }
     }
     

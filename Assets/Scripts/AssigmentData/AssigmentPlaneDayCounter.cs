@@ -12,6 +12,8 @@ namespace AssigmentData
 
         [SerializeField] private TMP_Text _text;
 
+        public event Action LowTimeLeft;
+
         public void CalculateTime(DateTime dueTime)
         {
             DateTime currentTime = DateTime.Now;
@@ -31,11 +33,7 @@ namespace AssigmentData
             {
                 _text.text = $"{(int)timeDifference.TotalHours} hours left";
                 _text.color = _criticalColor;
-            }
-            else
-            {
-                _text.text = "<1 hour left";
-                _text.color = _criticalColor;
+                LowTimeLeft?.Invoke();
             }
         }
     }
