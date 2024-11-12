@@ -336,7 +336,7 @@ MonoBehaviour:
   _toggleImage: {fileID: 5275177518812976117}
   _selectedToggleSprite: {fileID: 21300000, guid: 9e39f0e33ee61844e9fe090924d1fa52, type: 3}
   _unselectedToggleSprite: {fileID: 21300000, guid: 080eb0f14b1557e49a7f5ba820670bf0, type: 3}
-  _name: {fileID: 8710651487080925933}
+  _name: {fileID: 296870983131681670}
   _deleteButton: {fileID: 4310576645266625592}
   _selectButton: {fileID: 9200870741409100721}
 --- !u!1 &7921925947133161647

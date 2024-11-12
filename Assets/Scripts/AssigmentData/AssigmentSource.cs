@@ -10,9 +10,9 @@ namespace AssigmentData
         [SerializeField] private TMP_InputField _name;
         [SerializeField] private Button _deleteButton;
 
-        public event Action<AssigmentSource> Deleted; 
-        
-        public AssigmentSourceData Data { get; private set; }
+        public event Action<AssigmentSource> Deleted;
+
+        public AssigmentSourceData Data { get; private set; } = new AssigmentSourceData(string.Empty);
         public bool IsActive { get; private set; }
 
         public void OnEnable()
@@ -55,5 +55,10 @@ namespace AssigmentData
     public class AssigmentSourceData
     {
         public string Name;
+
+        public AssigmentSourceData(string name)
+        {
+            Name = name;
+        }
     }
 }

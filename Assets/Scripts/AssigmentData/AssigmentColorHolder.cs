@@ -36,5 +36,6 @@ public enum ColorType
     Red,
     Orange,
     Brown,
-    Black
+    Black,
+    None
 }

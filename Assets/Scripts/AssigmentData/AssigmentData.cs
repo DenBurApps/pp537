@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AssigmentData
@@ -15,6 +16,8 @@ namespace AssigmentData
         public IconType IconType;
         public ColorType ColorType;
         public bool IsSelected;
+        public List<AssigmentSourceData> SourceDatas;
+        public List<AssigmentStepData> StepDatas;
         
         public AssigmentData(string name, string subject, string note, string date, int timeHr, int timeMin, IconType iconType, ColorType colorType)
         {
@@ -27,6 +30,8 @@ namespace AssigmentData
             IconType = iconType;
             ColorType = colorType;
             IsSelected = false;
+            SourceDatas = new List<AssigmentSourceData>();
+            StepDatas = new List<AssigmentStepData>();
         }
     }
     

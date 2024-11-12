@@ -9,6 +9,8 @@ namespace AssigmentDataInputScreen
     {
         [SerializeField] private List<AssigmentStep> _steps;
 
+        public event Action AllPlanesDisabled;
+        
         private void OnEnable()
         {
             DisableAllSteps();
@@ -32,10 +34,23 @@ namespace AssigmentDataInputScreen
                 step.Deleted += DisableStep;
             }
         }
+        
+        public List<AssigmentStepData> GetDatas()
+        {
+            return _steps
+                .Where(source => source.Data != null)
+                .Select(source => source.Data)
+                .ToList();
+        }
 
         private void DisableStep(AssigmentStep step)
         {
             step.Disable();
+            
+            if(AreAllStepsDisabled())
+            {
+                AllPlanesDisabled?.Invoke();
+            }
         }
 
         private void DisableAllSteps()
@@ -44,6 +59,11 @@ namespace AssigmentDataInputScreen
             {
                 step.Disable();
             }
+        }
+        
+        private bool AreAllStepsDisabled()
+        {
+            return _steps.All(source => !source.IsActive);
         }
     }
 }

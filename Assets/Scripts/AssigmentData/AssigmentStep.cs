@@ -19,7 +19,7 @@ public class AssigmentStep : MonoBehaviour
     public event Action<AssigmentStep> Deleted;
 
     public bool IsActive { get; private set; }
-    public AssigmentStepData Data { get; private set; }
+    public AssigmentStepData Data { get; private set; } = new AssigmentStepData(string.Empty, false);
 
     private void OnEnable()
     {
@@ -66,19 +66,16 @@ public class AssigmentStep : MonoBehaviour
 
     private void OnToggleButtonClicked()
     {
-        if (Data != null)
+        if (Data.IsSelected)
         {
-            if (Data.IsSelected)
-            {
-                Data.IsSelected = true;
-            }
-            else
-            {
-                Data.IsSelected = false;
-            }
-            
-            ToggleSelection();
+            Data.IsSelected = false;
         }
+        else
+        {
+            Data.IsSelected = true;
+        }
+
+        ToggleSelection();
     }
 
     private void OnNameInputed(string name)

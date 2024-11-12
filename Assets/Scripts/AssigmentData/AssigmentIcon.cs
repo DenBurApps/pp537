@@ -15,12 +15,15 @@ namespace AssigmentData
         private Button _button;
         private Color _defaultColor;
 
-        public event Action<IconType> Clicked; 
+        public IconType Type => _type;
+
+        public event Action<AssigmentIcon> Clicked; 
         
         private void Awake()
         {
             _image = GetComponent<Image>();
             _button = GetComponent<Button>();
+            _defaultColor = _image.color;
         }
 
         private void OnEnable()
@@ -50,7 +53,7 @@ namespace AssigmentData
 
         private void OnButtonClicked()
         {
-            Clicked?.Invoke(_type);
+            Clicked?.Invoke(this);
         }
     }
 }

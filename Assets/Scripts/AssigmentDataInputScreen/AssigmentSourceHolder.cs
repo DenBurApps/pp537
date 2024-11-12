@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AssigmentData;
@@ -9,6 +10,8 @@ namespace AssigmentDataInputScreen
     {
         [SerializeField] private List<AssigmentSource> _assigmentSources;
 
+        public event Action AllPlanesDisabled;
+        
         private void OnEnable()
         {
             DisableAllSteps();
@@ -18,24 +21,37 @@ namespace AssigmentDataInputScreen
         {
             foreach (var source in _assigmentSources)
             {
-                source.Deleted -= DisableStep;
+                source.Deleted -= DisableSource;
             }
         }
 
-        public void EnableStep()
+        public void EnableSource()
         {
             var source = _assigmentSources.FirstOrDefault(source => source.IsActive == false);
 
             if (source!)
             {
                 source.Enable();
-                source.Deleted += DisableStep;
+                source.Deleted += DisableSource;
             }
         }
 
-        private void DisableStep(AssigmentSource source)
+        public List<AssigmentSourceData> GetDatas()
+        {
+            return _assigmentSources
+                .Where(source => source.Data != null)
+                .Select(source => source.Data)
+                .ToList();
+        }
+
+        private void DisableSource(AssigmentSource source)
         {
             source.Disable();
+
+            if (AreAllStepsDisabled())
+            {
+                AllPlanesDisabled?.Invoke();
+            }
         }
 
         private void DisableAllSteps()
@@ -44,6 +60,11 @@ namespace AssigmentDataInputScreen
             {
                 source.Disable();
             }
+        }
+        
+        private bool AreAllStepsDisabled()
+        {
+            return _assigmentSources.All(source => !source.IsActive);
         }
     }
 }

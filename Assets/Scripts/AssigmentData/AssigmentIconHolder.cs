@@ -47,5 +47,6 @@ public enum IconType
     Fifteenth,
     Sixteenth,
     Seventeenth,
-    Eighteenth
+    Eighteenth,
+    None
 }

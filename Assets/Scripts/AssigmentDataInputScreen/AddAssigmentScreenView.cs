@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Bitsplash.DatePicker;
 using TMPro;
@@ -32,7 +33,6 @@ namespace AssigmentDataInputScreen
         public event Action<string> TimeInputed;
         public event Action AddStepClicked;
         public event Action AddSourceClicked;
-        public event Action AddAssigmentClicked;
         public event Action SaveClicked;
 
         private void Awake()
@@ -46,6 +46,12 @@ namespace AssigmentDataInputScreen
             _addStepButton.onClick.AddListener(OnAddStepClicked);
             _addSourceButton.onClick.AddListener(OnAddSourceClicked);
             _saveButton.onClick.AddListener(OnSaveClicked);
+            
+            _timeInput.onValueChanged.AddListener(ValidateTimeInput);
+            _timeInput.onEndEdit.AddListener(FormatTimeInput);
+            _nameInput.onValueChanged.AddListener(OnNameInputed);
+            _subjectInput.onValueChanged.AddListener(OnSubjectInputed);
+            _noteInput.onValueChanged.AddListener(OnNoteInputed);
 
             _datePicker.Content.OnSelectionChanged.AddListener(SetDate);
         }
@@ -57,6 +63,12 @@ namespace AssigmentDataInputScreen
             _addStepButton.onClick.RemoveListener(OnAddStepClicked);
             _addSourceButton.onClick.RemoveListener(OnAddSourceClicked);
             _saveButton.onClick.RemoveListener(OnSaveClicked);
+            
+            _timeInput.onValueChanged.RemoveListener(ValidateTimeInput);
+            _timeInput.onEndEdit.RemoveListener(FormatTimeInput);
+            _nameInput.onValueChanged.RemoveListener(OnNameInputed);
+            _subjectInput.onValueChanged.RemoveListener(OnSubjectInputed);
+            _noteInput.onValueChanged.RemoveListener(OnNoteInputed);
             
             _datePicker.Content.OnSelectionChanged.RemoveListener(SetDate);
 
@@ -125,13 +137,25 @@ namespace AssigmentDataInputScreen
 
         private void FormatTimeInput(string input)
         {
-            if (!Regex.IsMatch(input, @"^([01]?[0-9]|2[0-3]):[0-5][0-9]$"))
+            if (DateTime.TryParseExact(input, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedTime))
             {
-                Debug.Log("Invalid time format. Please enter time as HH:mm.");
-                _timeInput.text = "";
+                var time = parsedTime.ToString("HH:mm");
+                _timeInput.text = time;
+                TimeInputed?.Invoke(time);
             }
-
-            TimeInputed?.Invoke(input);
+            
+            if (input.Length == 4 && int.TryParse(input, out int numericInput))
+            {
+                int hours = numericInput / 100;
+                int minutes = numericInput % 100;
+                
+                if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59)
+                {
+                    var time = $"{hours:D2}:{minutes:D2}";
+                    _timeInput.text = time;
+                    TimeInputed?.Invoke(time);
+                }
+            }
         }
 
         private void OnNameInputed(string input) => NameInputed?.Invoke(input);

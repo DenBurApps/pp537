@@ -16,7 +16,9 @@ namespace AssigmentData
         private Button _button;
         private BetterImage _image;
 
-        public event Action<ColorType> Clicked;
+        public event Action<AssigmentColor> Clicked;
+
+        public ColorType Type => _colorType;
 
         private void Awake()
         {
@@ -50,6 +52,6 @@ namespace AssigmentData
             _checkImage.enabled = false;
         }
 
-        private void OnButtonClicked() => Clicked?.Invoke(_colorType);
+        private void OnButtonClicked() => Clicked?.Invoke(this);
     }
 }
