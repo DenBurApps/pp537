@@ -13,6 +13,7 @@ namespace AssigmentData
         
         private Image _image;
         private Button _button;
+        private Color _defaultColor;
 
         public event Action<IconType> Clicked; 
         
@@ -35,6 +36,16 @@ namespace AssigmentData
         private void Start()
         {
             _image.sprite = _iconHolder.GetSpriteByType(_type);
+        }
+
+        public void SetSelected(Color color)
+        {
+            _image.color = color;
+        }
+
+        public void SetDefault()
+        {
+            _image.color = _defaultColor;
         }
 
         private void OnButtonClicked()

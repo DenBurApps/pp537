@@ -11,6 +11,7 @@ namespace AssigmentData
     {
         [SerializeField] private ColorType _colorType;
         [SerializeField] private AssigmentColorHolder _colorHolder;
+        [SerializeField] private Image _checkImage;
 
         private Button _button;
         private BetterImage _image;
@@ -36,6 +37,17 @@ namespace AssigmentData
         private void Start()
         {
             _image.color = _colorHolder.GetColorByType(_colorType);
+            SetDefault();
+        }
+
+        public void SetSelected()
+        {
+            _checkImage.enabled = true;
+        }
+
+        public void SetDefault()
+        {
+            _checkImage.enabled = false;
         }
 
         private void OnButtonClicked() => Clicked?.Invoke(_colorType);

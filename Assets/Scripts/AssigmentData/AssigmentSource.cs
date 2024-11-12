@@ -7,7 +7,7 @@ namespace AssigmentData
 {
     public class AssigmentSource : MonoBehaviour
     {
-        [SerializeField] private TMP_Text _name;
+        [SerializeField] private TMP_InputField _name;
         [SerializeField] private Button _deleteButton;
 
         public event Action<AssigmentSource> Deleted; 
@@ -15,16 +15,22 @@ namespace AssigmentData
         public AssigmentSourceData Data { get; private set; }
         public bool IsActive { get; private set; }
 
-        public void Enable(AssigmentSourceData sourceData)
+        public void OnEnable()
+        {
+            _deleteButton.onClick.AddListener(OnDeleteButtonClicked);
+            _name.onValueChanged.AddListener(OnNameInputed);
+        }
+
+        private void OnDisable()
+        {
+            _deleteButton.onClick.RemoveListener(OnDeleteButtonClicked);
+            _name.onValueChanged.RemoveListener(OnNameInputed);
+        }
+
+        public void Enable()
         {
             gameObject.SetActive(true);
             IsActive = true;
-
-            if (sourceData == null)
-                throw new ArgumentNullException(nameof(sourceData));
-
-            Data = sourceData;
-            _name.text = Data.Name;
         }
 
         public void Disable()
@@ -32,7 +38,17 @@ namespace AssigmentData
             gameObject.SetActive(false);
             IsActive = false;
         }
-        
+
+        private void OnNameInputed(string text)
+        {
+            Data.Name = text;
+        }
+
+        private void OnDeleteButtonClicked()
+        {
+            Deleted?.Invoke(this);
+            _name.text = "Enter name...";
+        }
     }
 
     [Serializable]

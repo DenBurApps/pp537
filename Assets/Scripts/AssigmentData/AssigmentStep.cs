@@ -12,7 +12,7 @@ public class AssigmentStep : MonoBehaviour
     [SerializeField] private Sprite _selectedToggleSprite;
     [SerializeField] private Sprite _unselectedToggleSprite;
 
-    [SerializeField] private TMP_Text _name;
+    [SerializeField] private TMP_InputField _name;
     [SerializeField] private Button _deleteButton;
     [SerializeField] private Button _selectButton;
 
@@ -25,24 +25,20 @@ public class AssigmentStep : MonoBehaviour
     {
         _deleteButton.onClick.AddListener(OnDeleteButtonClicked);
         _selectButton.onClick.AddListener(OnToggleButtonClicked);
+        _name.onValueChanged.AddListener(OnNameInputed);
     }
 
     private void OnDisable()
     {
         _deleteButton.onClick.RemoveListener(OnDeleteButtonClicked);
         _selectButton.onClick.RemoveListener(OnToggleButtonClicked);
+        _name.onValueChanged.RemoveListener(OnNameInputed);
     }
 
-    public void Enable(AssigmentStepData data)
+    public void Enable()
     {
         gameObject.SetActive(true);
         IsActive = true;
-
-        if (data == null)
-            throw new ArgumentNullException(nameof(data));
-
-        Data = data;
-        _name.text = Data.Name;
 
         ToggleSelection();
     }
@@ -50,6 +46,7 @@ public class AssigmentStep : MonoBehaviour
     public void Disable()
     {
         gameObject.SetActive(false);
+        _name.text = "Enter name...";
         IsActive = false;
     }
 
@@ -57,12 +54,12 @@ public class AssigmentStep : MonoBehaviour
     {
         if (Data.IsSelected)
         {
-            _name.color = _selectedColor;
+            _name.textComponent.color = _selectedColor;
             _toggleImage.sprite = _selectedToggleSprite;
         }
         else
         {
-            _name.color = _defaultColor;
+            _name.textComponent.color = _defaultColor;
             _toggleImage.sprite = _unselectedToggleSprite;
         }
     }
@@ -84,7 +81,16 @@ public class AssigmentStep : MonoBehaviour
         }
     }
 
-    private void OnDeleteButtonClicked() => Deleted?.Invoke(this);
+    private void OnNameInputed(string name)
+    {
+        Data.Name = name;
+    }
+
+    private void OnDeleteButtonClicked()
+    {
+        Deleted?.Invoke(this);
+        _name.text = "Enter name...";
+    }
 }
 
 [Serializable]
