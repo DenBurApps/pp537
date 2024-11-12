@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using AssigmentData;
+using MainScreen;
 using UnityEngine;
 
 namespace AssigmentDataInputScreen
@@ -9,7 +10,7 @@ namespace AssigmentDataInputScreen
     public class AddAssigmentScreen : MonoBehaviour
     {
         [SerializeField] private Color _selectedIconColor;
-        
+        [SerializeField] private MainScreenAssigmentHolder _mainScreenAssigmentHolder;
         [SerializeField] private AddAssigmentScreenView _view;
         [SerializeField] private AssigmentSourceHolder _assigmentSourceHolder;
         [SerializeField] private AssigmentStepHolder _assigmentStepHolder;
@@ -81,11 +82,17 @@ namespace AssigmentDataInputScreen
 
         private void Start()
         {
-            //_view.Disable();
+            _view.Disable();
             _assigmentSourceHolder.gameObject.SetActive(false);
             _assigmentStepHolder.gameObject.SetActive(false);
             ResetValues();
             ValidateInput();
+        }
+
+        public void EnableScreen()
+        {
+            ResetValues();
+            _view.Enable();
         }
 
         private void SelectCurrentIcon(AssigmentIcon icon)
@@ -98,6 +105,7 @@ namespace AssigmentDataInputScreen
             _currentIcon = icon;
             _selectedIconType = _currentIcon.Type;
             _currentIcon.SetSelected(_selectedIconColor);
+            ValidateInput();
         }
 
         private void SelectCurrentColor(AssigmentColor color)
@@ -110,6 +118,7 @@ namespace AssigmentDataInputScreen
             _currentColor = color;
             _selectedColorType = _currentColor.Type;
             _currentColor.SetSelected();
+            ValidateInput();
         }
 
         private void AddStep()
@@ -181,6 +190,7 @@ namespace AssigmentDataInputScreen
             }
             
             Saved?.Invoke(assigmentData);
+            _view.Disable();
         }
 
         private void ValidateInput()

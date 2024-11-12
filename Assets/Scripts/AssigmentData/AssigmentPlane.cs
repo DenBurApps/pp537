@@ -8,6 +8,9 @@ namespace AssigmentData
 {
     public class AssigmentPlane : MonoBehaviour
     {
+        [SerializeField] private Image _image;
+        [SerializeField] private Color _lowTimeColor;
+        [SerializeField] private Color _defaultColor;
         [SerializeField] private TMP_Text _nameText;
         [SerializeField] private TMP_Text _dateText;
         [SerializeField] private TMP_Text _timeText;
@@ -17,9 +20,19 @@ namespace AssigmentData
 
         private AssigmentIconHolder _iconHolder;
         private AssigmentColorHolder _colorHolder;
-        
+
+        public event Action<AssigmentPlane> Checked;
+
         public AssigmentData Data { get; private set; }
         public bool IsActive { get; private set; }
+        public bool IsChecked { get; private set; }
+
+        private void OnEnable()
+        {
+            _dayCounter.LowTimeLeft += () => _image.color = _lowTimeColor;
+
+            _checkButton.onClick.AddListener(SetChecked);
+        }
 
         public void Enable()
         {
@@ -49,10 +62,11 @@ namespace AssigmentData
             _nameText.text = Data.Name;
             _dateText.text = Data.Date;
             _timeText.text = $"{Data.TimeHr}:{Data.TimeMin}";
-            
+
             if (DateTime.TryParse($"{Data.Date} {Data.TimeHr}:{Data.TimeMin}", out DateTime dueDate))
             {
-                _dayCounter.CalculateTime(dueDate);
+                if (_dayCounter != null && _dayCounter.isActiveAndEnabled)
+                    _dayCounter.CalculateTime(dueDate);
             }
             else
             {
@@ -61,6 +75,13 @@ namespace AssigmentData
 
             _logo.sprite = _iconHolder.GetSpriteByType(Data.IconType);
             _logo.color = _colorHolder.GetColorByType(Data.ColorType);
+        }
+
+        private void SetChecked()
+        {
+            IsChecked = true;
+            Data.IsSelected = true;
+            Checked?.Invoke(this);
         }
     }
 }

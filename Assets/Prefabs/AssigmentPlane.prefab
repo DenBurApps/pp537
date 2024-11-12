@@ -856,7 +856,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5869313557405352609}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -920,6 +920,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 080a797cfc011404296c4243a3e1ff9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _image: {fileID: 193124116934466513}
+  _lowTimeColor: {r: 0.9647059, g: 0.827451, b: 0.80784315, a: 1}
+  _defaultColor: {r: 0.96862745, g: 0.96862745, b: 0.96862745, a: 1}
   _nameText: {fileID: 4156669420270285966}
   _dateText: {fileID: 3728745290072097408}
   _timeText: {fileID: 265379536051434896}
