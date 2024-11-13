@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,10 +19,23 @@ namespace EventData
         [SerializeField] private TMP_Text _examPersentage;
         [SerializeField] private GameObject _examPersentagePlane;
         [SerializeField] private Image _image;
+        [SerializeField] private Button _openButton;
 
         public bool IsCompleted { get; private set; }
         public bool IsActive { get; private set; }
         public EventData EventData { get; private set; }
+
+        public event Action<EventPlane> PlaneOpened;
+
+        private void OnEnable()
+        {
+            _openButton.onClick.AddListener(OnPlaneOpened);
+        }
+
+        private void OnDisable()
+        {
+            _openButton.onClick.RemoveListener(OnPlaneOpened);
+        }
 
         public void Enable()
         {
@@ -48,7 +62,7 @@ namespace EventData
             {
                 _name.text += $"<br>{EventData.Note}";
             }
-            
+
             _time.text = $"{EventData.TimeHr}:{EventData.TimeMin:00}";
 
             if (EventData.DurationHr > 0 || EventData.DurationMin > 0)
@@ -64,16 +78,16 @@ namespace EventData
 
                 _time.text += $" - {finalTimeHr}:{finalTimeMin:00}";
             }
-            
+
             if (EventData.IsExam)
             {
                 _image.sprite = _examSprite;
-                
-                if(EventData.ExamData == null)
+
+                if (EventData.ExamData == null)
                     return;
-                
+
                 _examPersentagePlane.gameObject.SetActive(true);
-                
+
                 float completionPercentage = EventData.ExamData.GetCompletionPercentage();
                 _examPersentage.text = $"{completionPercentage:F0}%";
             }
@@ -103,6 +117,18 @@ namespace EventData
             _image.sprite = _plannedSprite;
             _time.color = _defaultColor;
             _name.color = _defaultColor;
+        }
+
+        public void Reset()
+        {
+            _name.text = string.Empty;
+            _time.text = string.Empty;
+            EventData = null;
+        }
+
+        private void OnPlaneOpened()
+        {
+            PlaneOpened?.Invoke(this);
         }
     }
 }
