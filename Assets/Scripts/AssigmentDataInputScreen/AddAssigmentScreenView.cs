@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Bitsplash.DatePicker;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,6 +33,7 @@ namespace AssigmentDataInputScreen
         public event Action AddStepClicked;
         public event Action AddSourceClicked;
         public event Action SaveClicked;
+        public event Action BackClicked;
 
         private void Awake()
         {
@@ -46,7 +46,8 @@ namespace AssigmentDataInputScreen
             _addStepButton.onClick.AddListener(OnAddStepClicked);
             _addSourceButton.onClick.AddListener(OnAddSourceClicked);
             _saveButton.onClick.AddListener(OnSaveClicked);
-            
+            _backButton.onClick.AddListener(OnBackClicked);
+
             _timeInput.onValueChanged.AddListener(ValidateTimeInput);
             _timeInput.onEndEdit.AddListener(FormatTimeInput);
             _nameInput.onValueChanged.AddListener(OnNameInputed);
@@ -58,20 +59,19 @@ namespace AssigmentDataInputScreen
 
         private void OnDisable()
         {
-            
             _dateButton.onClick.RemoveListener(OnDateButtonClicked);
             _addStepButton.onClick.RemoveListener(OnAddStepClicked);
             _addSourceButton.onClick.RemoveListener(OnAddSourceClicked);
             _saveButton.onClick.RemoveListener(OnSaveClicked);
-            
+            _backButton.onClick.RemoveListener(OnBackClicked);
+
             _timeInput.onValueChanged.RemoveListener(ValidateTimeInput);
             _timeInput.onEndEdit.RemoveListener(FormatTimeInput);
             _nameInput.onValueChanged.RemoveListener(OnNameInputed);
             _subjectInput.onValueChanged.RemoveListener(OnSubjectInputed);
             _noteInput.onValueChanged.RemoveListener(OnNoteInputed);
-            
-            _datePicker.Content.OnSelectionChanged.RemoveListener(SetDate);
 
+            _datePicker.Content.OnSelectionChanged.RemoveListener(SetDate);
         }
 
         public void SetDate(string date)
@@ -137,18 +137,19 @@ namespace AssigmentDataInputScreen
 
         private void FormatTimeInput(string input)
         {
-            if (DateTime.TryParseExact(input, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedTime))
+            if (DateTime.TryParseExact(input, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out DateTime parsedTime))
             {
                 var time = parsedTime.ToString("HH:mm");
                 _timeInput.text = time;
                 TimeInputed?.Invoke(time);
             }
-            
+
             if (input.Length == 4 && int.TryParse(input, out int numericInput))
             {
                 int hours = numericInput / 100;
                 int minutes = numericInput % 100;
-                
+
                 if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59)
                 {
                     var time = $"{hours:D2}:{minutes:D2}";
@@ -165,5 +166,6 @@ namespace AssigmentDataInputScreen
         private void OnAddStepClicked() => AddStepClicked?.Invoke();
         private void OnAddSourceClicked() => AddSourceClicked?.Invoke();
         private void OnSaveClicked() => SaveClicked?.Invoke();
+        private void OnBackClicked() => BackClicked?.Invoke();
     }
 }

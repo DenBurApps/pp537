@@ -54,6 +54,7 @@ namespace ScheduleScreen
             _addEventButton.onClick.AddListener(AddEvent);
             _menu.MainScreenClicked += (() => MainScreenClicked?.Invoke());
             _editEvent.Saved += SavedNewData;
+            _addEventScreen.BackClicked += Enable;
         }
 
         private void OnDisable()
@@ -67,6 +68,7 @@ namespace ScheduleScreen
             _editEvent.Deleted -= DeletePlane;
             _addEventButton.onClick.RemoveListener(AddEvent);
             _editEvent.Saved -= SavedNewData;
+            _addEventScreen.BackClicked -= Enable;
         }
 
         private void Start()
@@ -75,9 +77,10 @@ namespace ScheduleScreen
             DisableAllEvents();
         }
 
-        public void Enable(List<EventData.EventData> datas)
+        public void Enable()
         {
             _screenVisabilityHandler.EnableScreen();
+            var datas = _eventHolder.Datas;
             
             if (datas.Count <= 0)
             {

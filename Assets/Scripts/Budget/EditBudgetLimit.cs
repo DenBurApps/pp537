@@ -21,6 +21,7 @@ public class EditBudgetLimit : MonoBehaviour
     [SerializeField] private Button _setLimit;
     [SerializeField] private Button _cancel;
     [SerializeField] private Button _deleteButton;
+    [SerializeField] private Button _backButton;
 
     public event Action<BudgetData> DataSaved;
     public event Action<BudgetData> Deleted;
@@ -44,6 +45,8 @@ public class EditBudgetLimit : MonoBehaviour
         _yearlyBudget.onClick.AddListener((() => OnTypeButtonClicked(_yearlyBudget)));
         
         _deleteButton.onClick.AddListener(Delete);
+        _cancel.onClick.AddListener(Cancel);
+        _backButton.onClick.AddListener(Cancel);
 
         _datePicker.Content.OnSelectionChanged.AddListener(SetDate);
 
@@ -60,6 +63,8 @@ public class EditBudgetLimit : MonoBehaviour
         _yearlyBudget.onClick.RemoveListener((() => OnTypeButtonClicked(_yearlyBudget)));
 
         _deleteButton.onClick.RemoveListener(Delete);
+        _cancel.onClick.RemoveListener(Cancel);
+        _backButton.onClick.RemoveListener(Cancel);
         
         _datePicker.Content.OnSelectionChanged.RemoveListener(SetDate);
     }
@@ -80,11 +85,13 @@ public class EditBudgetLimit : MonoBehaviour
         {
             _currentTypeButton = _yearlyBudget;
             _yearlyBudget.image.color = _selectedColor;
+            _semesterBudget.image.color = _defaultColor;
         }
         else
         {
             _currentTypeButton = _semesterBudget;
             _semesterBudget.image.color = _selectedColor;
+            _yearlyBudget.image.color = _defaultColor;
         }
 
         _currentData = data;
@@ -160,6 +167,7 @@ public class EditBudgetLimit : MonoBehaviour
 
         var budgetData = new BudgetData(_maxAmount, _name, _startDate, _endDate, isYearly);
         DataSaved?.Invoke(budgetData);
+        gameObject.SetActive(false);
     }
 
     private void ValidateInput()
@@ -171,6 +179,11 @@ public class EditBudgetLimit : MonoBehaviour
     private void Delete()
     {
         Deleted?.Invoke(_currentData);
+        gameObject.SetActive(false);
+    }
+
+    private void Cancel()
+    {
         gameObject.SetActive(false);
     }
 }

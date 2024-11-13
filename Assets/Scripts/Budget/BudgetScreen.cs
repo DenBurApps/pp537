@@ -1,7 +1,6 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using Exams;
+using MainScreen;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +15,9 @@ public class BudgetScreen : MonoBehaviour
     [SerializeField] private LogSpending _logSpending;
     [SerializeField] private BudgetHistory _budgetHistory;
     [SerializeField] private GameObject _emptyPlane;
+    [SerializeField] private MainScreenView _mainScreenView;
+    [SerializeField] private ScheduleScreen.ScheduleScreen _scheduleScreen;
+    [SerializeField] private ExamsScreen _examsScreen;
 
     private ScreenVisabilityHandler _screenVisabilityHandler;
 
@@ -37,9 +39,13 @@ public class BudgetScreen : MonoBehaviour
             plane.HistoryClicked += OpenBudgetHistory;
             plane.EditLimitClicked += EditBudget;
         }
-        
+
         _addBudgetButton.onClick.AddListener(AddBudget);
         _logSpending.Saved += UpdateData;
+
+        _menu.ScheduleClicked += ScheduleOpen;
+        _menu.ExamsClicked += ExamsOpen;
+        _menu.MainScreenClicked += MainScreenOpen;
     }
 
     private void OnDisable()
@@ -55,9 +61,13 @@ public class BudgetScreen : MonoBehaviour
             plane.HistoryClicked -= OpenBudgetHistory;
             plane.EditLimitClicked -= EditBudget;
         }
-        
+
         _addBudgetButton.onClick.RemoveListener(AddBudget);
         _logSpending.Saved -= UpdateData;
+        
+        _menu.ScheduleClicked -= ScheduleOpen;
+        _menu.ExamsClicked -= ExamsOpen;
+        _menu.MainScreenClicked -= MainScreenOpen;
     }
 
     private void Start()
@@ -67,7 +77,7 @@ public class BudgetScreen : MonoBehaviour
         _logSpending.gameObject.SetActive(false);
         _budgetHistory.gameObject.SetActive(false);
 
-        //_screenVisabilityHandler.DisableScreen();
+        _screenVisabilityHandler.DisableScreen();
 
         foreach (var plane in _planes)
         {
@@ -77,9 +87,19 @@ public class BudgetScreen : MonoBehaviour
         _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
     }
 
+    public void Enable()
+    {
+        _screenVisabilityHandler.EnableScreen();
+    }
+
     private bool ArePlanesAvailable()
     {
         return _planes.All(plane => !plane.IsActive);
+    }
+
+    private bool AllPlanesActive()
+    {
+        return _planes.Any(plane => !plane.IsActive);
     }
 
     private void AddBudget()
@@ -98,7 +118,7 @@ public class BudgetScreen : MonoBehaviour
             _planes[1].Enable(data);
         }
 
-        _addBudgetButton.interactable = ArePlanesAvailable();
+        _addBudgetButton.interactable = AllPlanesActive();
         _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
     }
 
@@ -128,7 +148,7 @@ public class BudgetScreen : MonoBehaviour
             _planes[1].SetData(data);
         }
 
-        _addBudgetButton.interactable = ArePlanesAvailable();
+        _addBudgetButton.interactable = AllPlanesActive();
     }
 
     private void Delete(BudgetData data)
@@ -141,8 +161,26 @@ public class BudgetScreen : MonoBehaviour
         {
             _planes[1].Disable();
         }
-        
-        _addBudgetButton.interactable = ArePlanesAvailable();
+
+        _addBudgetButton.interactable = AllPlanesActive();
         _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
+    }
+
+    private void MainScreenOpen()
+    {
+        _screenVisabilityHandler.DisableScreen();
+        _mainScreenView.Enable();
+    }
+
+    private void ScheduleOpen()
+    {
+        _screenVisabilityHandler.DisableScreen();
+        _scheduleScreen.Enable();
+    }
+
+    private void ExamsOpen()
+    {
+        _examsScreen.Enable();
+        _screenVisabilityHandler.DisableScreen();
     }
 }

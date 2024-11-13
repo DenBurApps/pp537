@@ -15,9 +15,11 @@ namespace Exams
         [SerializeField] private AddEventScreen _addEventScreen;
         [SerializeField] private Menu _menu;
         [SerializeField] private Button _addEventButton;
-        [SerializeField] private Button _backButton;
         [SerializeField] private GameObject _emptyPlane;
         [SerializeField] private MainScreenEventHolder _eventHolder;
+        [SerializeField] private BudgetScreen _budgetScreen;
+        [SerializeField] private MainScreenView _mainScreenView;
+        [SerializeField] private ScheduleScreen.ScheduleScreen _scheduleScreen;
 
         private ScreenVisabilityHandler _screenVisabilityHandler;
 
@@ -26,8 +28,32 @@ namespace Exams
             _screenVisabilityHandler = GetComponent<ScreenVisabilityHandler>();
         }
 
+        private void OnEnable()
+        {
+            _addEventButton.onClick.AddListener(AddEvent);
+
+            _menu.ScheduleClicked += ScheduleOpen;
+            _menu.BudgetClicked += BudgetOpen;
+            _menu.MainScreenClicked += MainScreenOpen;
+        }
+
+        private void OnDisable()
+        {
+            _addEventButton.onClick.RemoveListener(AddEvent);
+            
+            _menu.ScheduleClicked -= ScheduleOpen;
+            _menu.BudgetClicked -= BudgetOpen;
+            _menu.MainScreenClicked -= MainScreenOpen;
+        }
+
+        private void Start()
+        {
+            DisableAllPlanes();
+        }
+
         public void Enable()
         {
+            _screenVisabilityHandler.EnableScreen();
             var datas = _eventHolder.Datas;
 
             if (datas.Count <= 0)
@@ -55,11 +81,36 @@ namespace Exams
             {
                 plane.Disable();
             }
+            _emptyPlane.gameObject.SetActive(ArePlanesActive());
         }
 
         private bool ArePlanesActive()
         {
             return _planes.All(plane => !plane.IsActive);
+        }
+
+        private void AddEvent()
+        {
+            _addEventScreen.EnableScreen();
+            _screenVisabilityHandler.DisableScreen();
+        }
+        
+        private void MainScreenOpen()
+        {
+            _screenVisabilityHandler.DisableScreen();
+            _mainScreenView.Enable();
+        }
+
+        private void ScheduleOpen()
+        {
+            _screenVisabilityHandler.DisableScreen();
+            _scheduleScreen.Enable();
+        }
+
+        private void BudgetOpen()
+        {
+            _budgetScreen.Enable();
+            _screenVisabilityHandler.DisableScreen();
         }
     }
 }

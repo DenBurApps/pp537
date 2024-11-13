@@ -16,13 +16,17 @@ namespace AllAssigments
         [SerializeField] private AssigmentColorHolder _colorHolder;
         [SerializeField] private GameObject _emptyPlane;
         [SerializeField] private AddAssigmentScreen _addAssigmentScreen;
+        [SerializeField] private AddAssigmentScreen _editAssigmentScreen;
         [SerializeField] private MainScreenAssigmentHolder _mainScreenAssigmentHolder;
         [SerializeField] private List<AssigmentPlane> _currentAssigments;
         [SerializeField] private List<AssigmentPlane> _checkedAssigments;
         [SerializeField] private List<AssigmentPlane> _deletedAssigments;
         [SerializeField] private Button _addAssigmentButton;
+        [SerializeField] private Button _backButtonClicked;
 
         private ScreenVisabilityHandler _screenVisabilityHandler;
+
+        public event Action BackClicked;
 
         private void Awake()
         {
@@ -34,6 +38,7 @@ namespace AllAssigments
             foreach (var plane in _currentAssigments)
             {
                 plane.SetHolders(_colorHolder, _iconHolder);
+                plane.GetComponent<AssigmentEditPlane>().OpenClicked += EditAssigment;
             }
 
             foreach (var plane in _checkedAssigments)
@@ -47,11 +52,24 @@ namespace AllAssigments
             }
             
             _addAssigmentButton.onClick.AddListener(AddNewAssigment);
+            _addAssigmentScreen.Edited += UpdateAllPlanes;
+            _addAssigmentScreen.BackEdited += UpdateAllPlanes;
+            _editAssigmentScreen.BackEdited += UpdateAllPlanes;
+            _backButtonClicked.onClick.AddListener(OnBackClicked);
         }
 
         private void OnDisable()
         {
             _addAssigmentButton.onClick.RemoveListener(AddNewAssigment);
+            _addAssigmentScreen.Edited -= UpdateAllPlanes;
+            _addAssigmentScreen.BackEdited -= UpdateAllPlanes;
+            _editAssigmentScreen.BackEdited -= UpdateAllPlanes;
+            _backButtonClicked.onClick.RemoveListener(OnBackClicked);
+            
+            foreach (var plane in _currentAssigments)
+            {
+                plane.GetComponent<AssigmentEditPlane>().OpenClicked -= EditAssigment;
+            }
         }
 
         private void Start()
@@ -122,6 +140,31 @@ namespace AllAssigments
         private void AddNewAssigment()
         {
             _addAssigmentScreen.EnableScreen();
+            _screenVisabilityHandler.DisableScreen();
+        }
+
+        private void EditAssigment(AssigmentPlane plane)
+        {
+            _editAssigmentScreen.EnableScreen(plane);
+            _screenVisabilityHandler.DisableScreen();
+        }
+
+        private void UpdateAllPlanes()
+        {
+            _screenVisabilityHandler.EnableScreen();
+            
+            foreach (var plane in _currentAssigments)
+            {
+                if (plane.IsActive)
+                {
+                    plane.UpdateText();
+                }
+            }
+        }
+
+        private void OnBackClicked()
+        {
+            BackClicked?.Invoke();
             _screenVisabilityHandler.DisableScreen();
         }
     }

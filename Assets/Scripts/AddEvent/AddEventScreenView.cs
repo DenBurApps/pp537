@@ -53,6 +53,7 @@ namespace AddEvent
             _examButton.onClick.AddListener(OnExamClicked);
             _datePicker.Content.OnSelectionChanged.AddListener(SetDate);
             _selectDurationButton.onClick.AddListener(OnDurationClicked);
+            _backButton.onClick.AddListener(OnBackClicked);
         }
 
         private void OnDisable()
@@ -66,6 +67,7 @@ namespace AddEvent
             _examButton.onClick.RemoveListener(OnExamClicked);
             _datePicker.Content.OnSelectionChanged.RemoveListener(SetDate);
             _selectDurationButton.onClick.RemoveListener(OnDurationClicked);
+            _backButton.onClick.RemoveListener(OnBackClicked);
         }
 
         public void Enable()
@@ -170,5 +172,6 @@ namespace AddEvent
         private void OnDurationClicked() => DurationClicked?.Invoke();
         private void OnExamClicked() => ExamClicked?.Invoke();
         private void OnSaveClicked() => SaveClicked?.Invoke();
+        private void OnBackClicked() => BackClicked?.Invoke();
     }
 }

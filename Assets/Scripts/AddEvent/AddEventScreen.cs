@@ -9,7 +9,7 @@ namespace AddEvent
     {
         [SerializeField] private AddEventScreenView _view;
         [SerializeField] private AddEventTimeInputer _timeInputer;
-        
+
         private string _name;
         private string _date;
         private string _note;
@@ -21,6 +21,7 @@ namespace AddEvent
         private ExamData _examData;
 
         public event Action<EventData.EventData> Saved;
+        public event Action BackClicked;
 
         private void OnEnable()
         {
@@ -31,6 +32,7 @@ namespace AddEvent
             _view.DurationClicked += OpenTimeInputer;
             _view.SaveClicked += SaveData;
             _view.ExamClicked += OnExamClicked;
+            _view.BackClicked += OnBackClicked;
 
             _timeInputer.ConfirmClicked += OnDurationInputed;
         }
@@ -50,7 +52,7 @@ namespace AddEvent
 
         private void Start()
         {
-           _view.Disable();
+            _view.Disable();
             _isExam = false;
         }
 
@@ -93,7 +95,7 @@ namespace AddEvent
             {
                 _durationHr = hrDuration;
             }
-            
+
             if (int.TryParse(min, out minDuration))
             {
                 _durationMin = minDuration;
@@ -102,18 +104,18 @@ namespace AddEvent
             _view.SetDuaration($"{hr}:{min}");
             ValidateInput();
         }
-        
+
         private void SetTime(string input)
         {
             TryParseTime(input, out _timeHr, out _timeMin);
             ValidateInput();
         }
-        
+
         private void TryParseTime(string input, out int hr, out int min)
         {
             hr = 0;
             min = 0;
-            
+
             string timePattern = @"^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
             if (Regex.IsMatch(input, timePattern))
             {
@@ -133,7 +135,7 @@ namespace AddEvent
             {
                 _isExam = false;
             }
-            
+
             _view.ToggleExamSprite(_isExam);
         }
 
@@ -141,11 +143,11 @@ namespace AddEvent
         {
             var eventData = new EventData.EventData(_timeHr, _timeMin, _date, _name, _note, _durationHr, _durationMin,
                 _isExam);
-            
+
             Saved?.Invoke(eventData);
             _view.Disable();
         }
-        
+
         private void ResetValues()
         {
             _name = string.Empty;
@@ -166,8 +168,14 @@ namespace AddEvent
         private void ValidateInput()
         {
             bool isValid = !string.IsNullOrEmpty(_name) && !string.IsNullOrEmpty(_date) && !string.IsNullOrEmpty(_note);
-            
+
             _view.ToggleSaveButton(isValid);
+        }
+
+        private void OnBackClicked()
+        {
+            BackClicked?.Invoke();
+            _view.Disable();
         }
     }
 }

@@ -231,7 +231,7 @@ namespace MainScreen
 
         private void OpenSchedule()
         {
-            _scheduleScreen.Enable(Datas);
+            _scheduleScreen.Enable();
             _view.Disable();
         }
     }

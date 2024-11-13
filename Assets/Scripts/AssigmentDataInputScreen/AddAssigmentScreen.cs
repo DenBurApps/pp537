@@ -16,7 +16,7 @@ namespace AssigmentDataInputScreen
         [SerializeField] private AssigmentStepHolder _assigmentStepHolder;
         [SerializeField] private List<AssigmentIcon> _icons;
         [SerializeField] private List<AssigmentColor> _colors;
-        
+
         private string _name;
         private string _subject;
         private string _note;
@@ -28,9 +28,12 @@ namespace AssigmentDataInputScreen
 
         private AssigmentIcon _currentIcon;
         private AssigmentColor _currentColor;
+        private AssigmentPlane _currentPlane;
 
         public event Action<AssigmentData.AssigmentData> Saved;
-        
+        public event Action Edited;
+        public event Action BackEdited;
+
         private void OnEnable()
         {
             foreach (var icon in _icons)
@@ -55,6 +58,7 @@ namespace AssigmentDataInputScreen
             _view.AddStepClicked += AddStep;
             _view.AddSourceClicked += AddSource;
             _view.SaveClicked += SaveData;
+            _view.BackClicked += OnBackClicked;
         }
 
         private void OnDisable()
@@ -68,7 +72,7 @@ namespace AssigmentDataInputScreen
             {
                 color.Clicked -= SelectCurrentColor;
             }
-            
+
             _view.NameInputed -= SetName;
             _view.DateInputed -= SetDate;
             _view.NoteInputed -= SetNote;
@@ -78,6 +82,7 @@ namespace AssigmentDataInputScreen
             _view.AddStepClicked -= AddStep;
             _view.AddSourceClicked -= AddSource;
             _view.SaveClicked -= SaveData;
+            _view.BackClicked -= OnBackClicked;
         }
 
         private void Start()
@@ -93,6 +98,35 @@ namespace AssigmentDataInputScreen
         {
             ResetValues();
             _view.Enable();
+        }
+
+        public void EnableScreen(AssigmentPlane plane)
+        {
+            _currentPlane = plane;
+
+            _date = plane.Data.Date;
+            _timeHr = plane.Data.TimeHr;
+            _timeMin = plane.Data.TimeMin;
+            _subject = plane.Data.Subject;
+            _note = plane.Data.Note;
+            _selectedColorType = plane.Data.ColorType;
+            _selectedIconType = plane.Data.IconType;
+
+            foreach (var icon in _icons)
+            {
+                if (icon.Type == _selectedIconType)
+                {
+                    SelectCurrentIcon(icon);
+                }
+            }
+
+            foreach (var color in _colors)
+            {
+                if (color.Type == _selectedColorType)
+                {
+                    SelectCurrentColor(color);
+                }
+            }
         }
 
         private void SelectCurrentIcon(AssigmentIcon icon)
@@ -127,7 +161,7 @@ namespace AssigmentDataInputScreen
             {
                 _assigmentStepHolder.gameObject.SetActive(true);
             }
-            
+
             _assigmentStepHolder.EnableStep();
         }
 
@@ -137,7 +171,7 @@ namespace AssigmentDataInputScreen
             {
                 _assigmentSourceHolder.gameObject.SetActive(true);
             }
-            
+
             _assigmentSourceHolder.EnableSource();
         }
 
@@ -188,8 +222,14 @@ namespace AssigmentDataInputScreen
             {
                 assigmentData.StepDatas = steps;
             }
-            
+
+            if (_currentPlane != null)
+            {
+                _currentPlane.SetData(assigmentData);
+            }
+
             Saved?.Invoke(assigmentData);
+            Edited?.Invoke();
             _view.Disable();
         }
 
@@ -198,7 +238,7 @@ namespace AssigmentDataInputScreen
             bool isValid = !string.IsNullOrEmpty(_name) && !string.IsNullOrEmpty(_subject) &&
                            _selectedColorType != ColorType.None
                            && _selectedIconType != IconType.None && !string.IsNullOrEmpty(_date);
-            
+
             _view.ToggleSaveButton(isValid);
         }
 
@@ -213,13 +253,17 @@ namespace AssigmentDataInputScreen
             _selectedColorType = ColorType.None;
             _selectedIconType = IconType.None;
             _view.CloseCalendar();
+            _view.SetDate(_date);
+            _view.SetName(_name);
+            _view.SetSubject(_subject);
+            _view.SetTime(string.Empty);
         }
-        
+
         private void TryParseTime(string input, out int hr, out int min)
         {
             hr = 0;
             min = 0;
-            
+
             string timePattern = @"^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
             if (Regex.IsMatch(input, timePattern))
             {
@@ -227,6 +271,12 @@ namespace AssigmentDataInputScreen
                 hr = int.Parse(timeParts[0]);
                 min = int.Parse(timeParts[1]);
             }
+        }
+
+        private void OnBackClicked()
+        {
+            BackEdited?.Invoke();
+            _view.Disable();
         }
     }
 }

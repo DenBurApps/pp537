@@ -77,6 +77,26 @@ namespace AssigmentData
             _logo.color = _colorHolder.GetColorByType(Data.ColorType);
         }
 
+        public void UpdateText()
+        {
+            _nameText.text = Data.Name;
+            _dateText.text = Data.Date;
+            _timeText.text = $"{Data.TimeHr}:{Data.TimeMin}";
+
+            if (DateTime.TryParse($"{Data.Date} {Data.TimeHr}:{Data.TimeMin}", out DateTime dueDate))
+            {
+                if (_dayCounter != null && _dayCounter.isActiveAndEnabled)
+                    _dayCounter.CalculateTime(dueDate);
+            }
+            else
+            {
+                Debug.LogError("Failed to parse date and time for assignment.");
+            }
+
+            _logo.sprite = _iconHolder.GetSpriteByType(Data.IconType);
+            _logo.color = _colorHolder.GetColorByType(Data.ColorType);
+        }
+
         private void SetChecked()
         {
             IsChecked = true;
