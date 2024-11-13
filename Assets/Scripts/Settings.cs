@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 #if UNITY_IOS
 using UnityEngine.iOS;
 #endif
@@ -14,8 +16,11 @@ public class Settings : MonoBehaviour
     [SerializeField] private GameObject _contactCanvas;
     [SerializeField] private GameObject _versionCanvas;
     [SerializeField] private TMP_Text _versionText;
+   // [SerializeField] private Button _backButton;
     private string _version = "Application version:\n";
 
+    public event Action SettingsClosed;
+    
     private void Awake()
     {
         _settingsCanvas.SetActive(false);
@@ -34,6 +39,12 @@ public class Settings : MonoBehaviour
     public void ShowSettings()
     {
         _settingsCanvas.SetActive(true);
+    }
+
+    private void OnBackButtonClicked()
+    {
+        SettingsClosed?.Invoke();
+        _settingsCanvas.SetActive(false);
     }
 
     public void RateUs()

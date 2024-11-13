@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Exams;
 using MainScreen;
@@ -20,6 +21,11 @@ public class BudgetScreen : MonoBehaviour
     [SerializeField] private ExamsScreen _examsScreen;
 
     private ScreenVisabilityHandler _screenVisabilityHandler;
+
+    public event Action FirstPlaneActive;
+    public event Action FirstPlaneDeleted;
+    public event Action SecondPlaneActive;
+    public event Action SecondPlaneDeleted;
 
     private void Awake()
     {
@@ -112,10 +118,12 @@ public class BudgetScreen : MonoBehaviour
         if (data.IsYearly)
         {
             _planes[0].Enable(data);
+            FirstPlaneActive?.Invoke();
         }
         else
         {
             _planes[1].Enable(data);
+            SecondPlaneActive?.Invoke();
         }
 
         _addBudgetButton.interactable = AllPlanesActive();
@@ -156,10 +164,12 @@ public class BudgetScreen : MonoBehaviour
         if (data.IsYearly)
         {
             _planes[0].Disable();
+            FirstPlaneDeleted?.Invoke();
         }
         else
         {
             _planes[1].Disable();
+            SecondPlaneDeleted?.Invoke();
         }
 
         _addBudgetButton.interactable = AllPlanesActive();
