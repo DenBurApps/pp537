@@ -8,6 +8,7 @@ namespace EventData
     public class EventPlane : MonoBehaviour
     {
         [SerializeField] private Color _completedColor;
+        [SerializeField] private Color _defaultColor;
         [SerializeField] private Sprite _nextSprite;
         [SerializeField] private Sprite _completedSprite;
         [SerializeField] private Sprite _plannedSprite;
@@ -64,9 +65,13 @@ namespace EventData
                 _time.text += $" - {finalTimeHr}:{finalTimeMin:00}";
             }
             
-            if (EventData.ExamData != null)
+            if (EventData.IsExam)
             {
                 _image.sprite = _examSprite;
+                
+                if(EventData.ExamData == null)
+                    return;
+                
                 _examPersentagePlane.gameObject.SetActive(true);
                 
                 float completionPercentage = EventData.ExamData.GetCompletionPercentage();
@@ -81,6 +86,8 @@ namespace EventData
         public void SetNextSprite()
         {
             _image.sprite = _nextSprite;
+            _time.color = _defaultColor;
+            _name.color = _defaultColor;
         }
 
         public void SetCompleted()
@@ -94,6 +101,8 @@ namespace EventData
         public void SetPlannedSprite()
         {
             _image.sprite = _plannedSprite;
+            _time.color = _defaultColor;
+            _name.color = _defaultColor;
         }
     }
 }

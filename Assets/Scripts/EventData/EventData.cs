@@ -15,9 +15,10 @@ namespace EventData
         public int DurationHr;
         public int DurationMin;
         public ExamData ExamData;
-        public bool isCompleted;
+        public bool IsCompleted;
+        public bool IsExam;
 
-        public EventData(int timeHr, int timeMin, string date, string name, string note, int durationHr, int durationMin)
+        public EventData(int timeHr, int timeMin, string date, string name, string note, int durationHr, int durationMin, bool isExam)
         {
             TimeHr = timeHr;
             TimeMin = timeMin;
@@ -26,6 +27,7 @@ namespace EventData
             Note = note;
             DurationHr = durationHr;
             DurationMin = durationMin;
+            IsExam = isExam;
         }
     }
 

@@ -26,7 +26,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2849764224283067579}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -130,6 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _completedColor: {r: 0.6392157, g: 0.6117647, b: 0.68235296, a: 1}
+  _defaultColor: {r: 0.08235294, g: 0.0627451, b: 0.11372549, a: 1}
   _nextSprite: {fileID: 21300000, guid: 5d7fc90b91511c54dbadfe92ef69b852, type: 3}
   _completedSprite: {fileID: 21300000, guid: 8616148e62bbbea4c90132f9e80999e6, type: 3}
   _plannedSprite: {fileID: 21300000, guid: 687bb7c62e71cf54e8eb32352c11de24, type: 3}
