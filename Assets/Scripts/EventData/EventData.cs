@@ -28,6 +28,7 @@ namespace EventData
             DurationHr = durationHr;
             DurationMin = durationMin;
             IsExam = isExam;
+            ExamData = new ExamData();
         }
     }
 
@@ -57,5 +58,10 @@ namespace EventData
     {
         public string Name;
         public bool IsCompleted;
+
+        public ExamStep()
+        {
+            IsCompleted = false;
+        }
     }
 }
