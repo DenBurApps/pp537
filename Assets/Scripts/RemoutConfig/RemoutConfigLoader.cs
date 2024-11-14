@@ -33,8 +33,9 @@ namespace RemoutConfig
         }
 #endif
             //Перед получением данных из конфига инициализируйте свою систему сохранений, чтоб не было null при сохранении ссылки
-            //_flagsmithClient = new(_key);
+            _flagsmithClient = new(_key);
             StartLoading();
+            LoadScene();
         }
 
 
@@ -49,8 +50,7 @@ namespace RemoutConfig
                 if(_key != null)
                 {
                     Debug.Log("Loading remote config");
-                    LoadScene();
-                    //LoadRemoutConfig();
+                    LoadRemoutConfig();
                 }
                 else
                 {

@@ -29,7 +29,6 @@ namespace MainScreen
 
         private void Awake()
         {
-            Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             _savePath = Path.Combine(Application.persistentDataPath, "EventData.json");
         }
 

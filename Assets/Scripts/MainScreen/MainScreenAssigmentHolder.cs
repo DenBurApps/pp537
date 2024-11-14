@@ -5,6 +5,7 @@ using System.Linq;
 using AllAssigments;
 using AssigmentData;
 using AssigmentDataInputScreen;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -81,7 +82,9 @@ namespace MainScreen
             {
                 availablePlane.Enable();
                 availablePlane.SetData(data);
-                Datas.Add(data);
+
+                if (!Datas.Contains(data))
+                    Datas.Add(data);
             }
 
             Save();
