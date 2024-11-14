@@ -27,6 +27,7 @@ namespace AllAssigments
         private ScreenVisabilityHandler _screenVisabilityHandler;
 
         public event Action BackClicked;
+        public event Action<List<AssigmentData.AssigmentData>> UpdatedDatas;
 
         private void Awake()
         {
@@ -152,14 +153,19 @@ namespace AllAssigments
         private void UpdateAllPlanes()
         {
             _screenVisabilityHandler.EnableScreen();
+
+            var datas = new List<AssigmentData.AssigmentData>();
             
             foreach (var plane in _currentAssigments)
             {
-                if (plane.IsActive)
+                if (plane.IsActive && plane.Data != null)
                 {
                     plane.UpdateText();
+                    datas.Add(plane.Data);
                 }
             }
+            
+            UpdatedDatas?.Invoke(datas);
         }
 
         private void OnBackClicked()

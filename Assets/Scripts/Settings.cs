@@ -16,7 +16,7 @@ public class Settings : MonoBehaviour
     [SerializeField] private GameObject _contactCanvas;
     [SerializeField] private GameObject _versionCanvas;
     [SerializeField] private TMP_Text _versionText;
-   // [SerializeField] private Button _backButton;
+    [SerializeField] private Button _backButton;
     private string _version = "Application version:\n";
 
     public event Action SettingsClosed;
@@ -29,6 +29,16 @@ public class Settings : MonoBehaviour
         _contactCanvas.SetActive(false);
         _versionCanvas.SetActive(false);
         SetVersion();
+    }
+
+    private void OnEnable()
+    {
+        _backButton.onClick.AddListener(OnBackButtonClicked);
+    }
+
+    private void OnDisable()
+    {
+        _backButton.onClick.RemoveListener(OnBackButtonClicked);
     }
 
     private void SetVersion()

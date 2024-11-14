@@ -33,7 +33,7 @@ namespace RemoutConfig
         }
 #endif
             //Перед получением данных из конфига инициализируйте свою систему сохранений, чтоб не было null при сохранении ссылки
-            _flagsmithClient = new(_key);
+            //_flagsmithClient = new(_key);
             StartLoading();
         }
 
@@ -48,7 +48,9 @@ namespace RemoutConfig
             {
                 if(_key != null)
                 {
-                    LoadRemoutConfig();
+                    Debug.Log("Loading remote config");
+                    LoadScene();
+                    //LoadRemoutConfig();
                 }
                 else
                 {
@@ -102,6 +104,8 @@ namespace RemoutConfig
             //Место для сохранения ссылки (Сохранять в плеер префс нельзя поскольку сброс данных приложения обнуляет эту информацию)
 
             //var reg = SaveSystem.LoadData<RegistrationSaveData>();
+            LinkSaver.Link = _allConfigData.link;
+            LinkSaver.SaveLink(_allConfigData.link);
             //reg.Link = _allConfigData.link;
             //SaveSystem.SaveData(reg);
             LoadScene();

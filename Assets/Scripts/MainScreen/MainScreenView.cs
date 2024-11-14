@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MainScreen
 {
@@ -11,6 +12,8 @@ namespace MainScreen
         [SerializeField] private Exams.ExamsScreen _examsScreen;
         [SerializeField] private BudgetScreen _budgetScreen;
         [SerializeField] private AllAssigments.AllAssigmentsScreen _allAssigmentsScreen;
+        [SerializeField] private Button _settingsButton;
+        [SerializeField] private Settings _settings;
         
         private ScreenVisabilityHandler _screenVisabilityHandler;
 
@@ -25,6 +28,8 @@ namespace MainScreen
             //_menu.ExamsClicked += OpenExams;
             _menu.BudgetClicked += OpenBudget;
             _allAssigmentsScreen.BackClicked += _screenVisabilityHandler.EnableScreen;
+            _settingsButton.onClick.AddListener(OpenSettings);
+            _settings.SettingsClosed += Enable;
         }
 
         private void OnDisable()
@@ -33,6 +38,8 @@ namespace MainScreen
             //_menu.ExamsClicked -= OpenExams;
             _menu.BudgetClicked -= OpenBudget;
             _allAssigmentsScreen.BackClicked -= _screenVisabilityHandler.EnableScreen;
+            _settingsButton.onClick.RemoveListener(OpenSettings);
+            _settings.SettingsClosed -= Enable;
         }
 
         public void Enable()
@@ -61,6 +68,12 @@ namespace MainScreen
         {
             Disable();
             _scheduleScreen.Enable();
+        }
+
+        private void OpenSettings()
+        {
+            _settings.ShowSettings();
+            Disable();
         }
     }
 }

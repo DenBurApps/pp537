@@ -48,6 +48,7 @@ namespace Exams
 
         private void Start()
         {
+            _screenVisabilityHandler.DisableScreen();
             DisableAllPlanes();
         }
 

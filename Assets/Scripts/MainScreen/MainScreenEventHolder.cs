@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using AddEvent;
@@ -22,11 +23,14 @@ namespace MainScreen
         [SerializeField] private ScheduleScreen.ScheduleScreen _scheduleScreen;
         [SerializeField] private Menu _menu;
 
+        private string _savePath;
+        
         public List<EventData.EventData> Datas { get; private set; } = new();
 
         private void Awake()
         {
             Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            _savePath = Path.Combine(Application.persistentDataPath, "EventData.json");
         }
 
         private void OnEnable()
@@ -56,6 +60,7 @@ namespace MainScreen
             DisableAllPlanes();
             _emptyPlane.gameObject.SetActive(ArePlanesActive());
             _dateText.text = DateTime.Now.ToString("ddd, dd.MM");
+            Load();
         }
 
         private void EnableEvent(EventData.EventData data)
@@ -71,6 +76,7 @@ namespace MainScreen
                 if (eventDate.Date != DateTime.Today)
                 {
                     Datas.Add(data);
+                    Save();
                     return;
                 }
             }
@@ -106,6 +112,7 @@ namespace MainScreen
                 }
             }
 
+            Save();
             _emptyPlane.gameObject.SetActive(ArePlanesActive());
         }
 
@@ -127,6 +134,8 @@ namespace MainScreen
                     Datas.Add(plane.EventData);
                 }
             }
+            
+            Save();
         }
 
         private void RemoveOldData(EventData.EventData data)
@@ -135,11 +144,14 @@ namespace MainScreen
             {
                 Datas.Remove(data);
             }
+            
+            Save();
         }
 
         private void SaveNewData(EventData.EventData data)
         {
             Datas.Add(data);
+            Save();
         }
 
         private void EnableTodaysPlanes()
@@ -227,6 +239,8 @@ namespace MainScreen
                 plane.Reset();
                 plane.Disable();
             }
+            
+            Save();
         }
 
         private void OpenSchedule()
@@ -234,5 +248,58 @@ namespace MainScreen
             _scheduleScreen.Enable();
             _view.Disable();
         }
+
+        private void Save()
+        {
+            try
+            {
+                string jsonData = JsonUtility.ToJson(new ActiveEventDataList(Datas), true);
+                
+                File.WriteAllText(_savePath, jsonData);
+
+                Debug.Log($"Data saved successfully to {_savePath}");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to save data to {_savePath}: {e.Message}");
+            }
+        }
+
+        private void Load()
+        {
+            try
+            {
+                if (File.Exists(_savePath))
+                {
+                    string jsonData = File.ReadAllText(_savePath);
+            
+
+                    ActiveEventDataList loadedData = JsonUtility.FromJson<ActiveEventDataList>(jsonData);
+                    Datas = loadedData?.Data ?? new List<EventData.EventData>();
+
+                    Debug.Log("Data loaded successfully.");
+                    EnableTodaysPlanes();
+                }
+                else
+                {
+                    Debug.Log("No saved data found.");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to load data from {_savePath}: {e.Message}");
+            }
+        }
+    }
+}
+
+[Serializable]
+public class ActiveEventDataList
+{
+    public List<EventData.EventData> Data;
+
+    public ActiveEventDataList(List<EventData.EventData> data)
+    {
+        Data = data;
     }
 }

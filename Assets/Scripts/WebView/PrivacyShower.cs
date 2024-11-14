@@ -13,8 +13,9 @@ public class PrivacyShower : MonoBehaviour
     public void OpenPrivacy()
     {
         //Подгружаем сохранённую ссылку в вебвью в зависимости от вашей системы сохранений
+        var link = LinkSaver.Link;
         //var reg = SaveSystem.LoadData<RegistrationSaveData>();
-        //_uni.Load(reg.Link);
+        _uni.Load(link);
         _uni.Show();
     }
 }

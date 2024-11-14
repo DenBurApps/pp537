@@ -21,6 +21,8 @@ namespace ScheduleScreen
         [SerializeField] private EditEvent _editEvent;
         [SerializeField] private MainScreenEventHolder _eventHolder;
         [SerializeField] private Menu _menu;
+        [SerializeField] private BudgetScreen _budgetScreen;
+        [SerializeField] private Exams.ExamsScreen _examsScreen;
 
         private ScreenVisabilityHandler _screenVisabilityHandler;
 
@@ -55,6 +57,8 @@ namespace ScheduleScreen
             _menu.MainScreenClicked += (() => MainScreenClicked?.Invoke());
             _editEvent.Saved += SavedNewData;
             _addEventScreen.BackClicked += Enable;
+            _menu.ExamsClicked += OpenExams;
+            _menu.BudgetClicked += OpenBudget;
         }
 
         private void OnDisable()
@@ -69,6 +73,8 @@ namespace ScheduleScreen
             _addEventButton.onClick.RemoveListener(AddEvent);
             _editEvent.Saved -= SavedNewData;
             _addEventScreen.BackClicked -= Enable;
+            _menu.ExamsClicked -= OpenExams;
+            _menu.BudgetClicked -= OpenBudget;
         }
 
         private void Start()
@@ -223,6 +229,18 @@ namespace ScheduleScreen
         {
             _screenVisabilityHandler.DisableScreen();
             _addEventScreen.EnableScreen();
+        }
+
+        private void OpenExams()
+        {
+            _examsScreen.Enable();
+            _screenVisabilityHandler.DisableScreen();
+        }
+
+        private void OpenBudget()
+        {
+            _budgetScreen.Enable();
+            _screenVisabilityHandler.DisableScreen();
         }
     }
 }

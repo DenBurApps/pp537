@@ -70,7 +70,7 @@ namespace AssigmentData
             }
             else
             {
-                Debug.LogError("Failed to parse date and time for assignment.");
+                //Debug.LogError("Failed to parse date and time for assignment.");
             }
 
             _logo.sprite = _iconHolder.GetSpriteByType(Data.IconType);
@@ -90,7 +90,7 @@ namespace AssigmentData
             }
             else
             {
-                Debug.LogError("Failed to parse date and time for assignment.");
+               // Debug.LogError("Failed to parse date and time for assignment.");
             }
 
             _logo.sprite = _iconHolder.GetSpriteByType(Data.IconType);

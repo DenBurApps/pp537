@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AllAssigments;
 using AssigmentData;
@@ -21,8 +22,15 @@ namespace MainScreen
         [SerializeField] private AddAssigmentScreen _addAssigmentScreen;
         [SerializeField] private AllAssigmentsScreen _allAssigmentsScreen;
 
-        public List<AssigmentData.AssigmentData> Datas { get; private set; } = new (); 
-        
+        private string _savePath;
+
+        public List<AssigmentData.AssigmentData> Datas { get; private set; } = new();
+
+        private void Awake()
+        {
+            _savePath = Path.Combine(Application.persistentDataPath, "AssigmentsData.json");
+        }
+
         private void OnEnable()
         {
             foreach (var plane in _planes)
@@ -34,6 +42,7 @@ namespace MainScreen
             _addAssigmentScreen.Saved += EnableAssigment;
             _addAssigmentButton.onClick.AddListener(OpenAddAssigment);
             _allAssigmentsButton.onClick.AddListener(OpenAllAssigments);
+            _allAssigmentsScreen.UpdatedDatas += UpdateAllDatas;
         }
 
         private void OnDisable()
@@ -46,12 +55,14 @@ namespace MainScreen
             _addAssigmentButton.onClick.RemoveListener(OpenAddAssigment);
             _addAssigmentScreen.Saved -= EnableAssigment;
             _allAssigmentsButton.onClick.RemoveListener(OpenAllAssigments);
+            _allAssigmentsScreen.UpdatedDatas -= UpdateAllDatas;
         }
 
         private void Start()
         {
             DisableAllPlanes();
             _emptyPlane.gameObject.SetActive(ArePlanesActive());
+            Load();
         }
 
         private void EnableAssigment(AssigmentData.AssigmentData data)
@@ -72,6 +83,8 @@ namespace MainScreen
                 availablePlane.SetData(data);
                 Datas.Add(data);
             }
+
+            Save();
 
             _emptyPlane.gameObject.SetActive(ArePlanesActive());
         }
@@ -107,8 +120,81 @@ namespace MainScreen
             {
                 plane.Disable();
             }
-            
+
             _emptyPlane.gameObject.SetActive(ArePlanesActive());
+            Save();
+        }
+
+        private void UpdateAllDatas(List<AssigmentData.AssigmentData> datas)
+        {
+            for (int i = 0; i < datas.Count; i++)
+            {
+                if (_planes[i].IsActive)
+                {
+                    _planes[i].SetData(datas[i]);
+                }
+            }
+
+            Save();
+        }
+
+        private void Save()
+        {
+            try
+            {
+                string jsonData = JsonUtility.ToJson(new AssignmentDataListWrapper(Datas), true);
+                File.WriteAllText(_savePath, jsonData);
+                Debug.Log($"Data saved successfully to {_savePath}");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to save data to {_savePath}: {e.Message}");
+            }
+        }
+
+        public void Load()
+        {
+            try
+            {
+                if (File.Exists(_savePath))
+                {
+                    string json = File.ReadAllText(_savePath);
+
+                    AssignmentDataListWrapper dataWrapper = JsonUtility.FromJson<AssignmentDataListWrapper>(json);
+                    List<AssigmentData.AssigmentData> loadedData =
+                        dataWrapper?.Data ?? new List<AssigmentData.AssigmentData>();
+
+                    Datas.Clear();
+                    DisableAllPlanes();
+
+
+                    foreach (var data in loadedData)
+                    {
+                        EnableAssigment(data);
+                    }
+
+                    Debug.Log("Assignment data loaded successfully.");
+                }
+                else
+                {
+                    Debug.Log("No saved assignment data found.");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to load assignment data: {e.Message}");
+            }
+        }
+    }
+
+    [Serializable]
+    public class AssignmentDataListWrapper
+    {
+        public List<AssigmentData.AssigmentData> Data;
+
+        public AssignmentDataListWrapper(List<AssigmentData.AssigmentData> data)
+        {
+            Data = data;
         }
     }
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Exams;
 using MainScreen;
@@ -21,6 +23,7 @@ public class BudgetScreen : MonoBehaviour
     [SerializeField] private ExamsScreen _examsScreen;
 
     private ScreenVisabilityHandler _screenVisabilityHandler;
+    private string savePath;
 
     public event Action FirstPlaneActive;
     public event Action FirstPlaneDeleted;
@@ -30,6 +33,7 @@ public class BudgetScreen : MonoBehaviour
     private void Awake()
     {
         _screenVisabilityHandler = GetComponent<ScreenVisabilityHandler>();
+        savePath = Path.Combine(Application.persistentDataPath, "budgetData.json");
     }
 
     private void OnEnable()
@@ -70,7 +74,7 @@ public class BudgetScreen : MonoBehaviour
 
         _addBudgetButton.onClick.RemoveListener(AddBudget);
         _logSpending.Saved -= UpdateData;
-        
+
         _menu.ScheduleClicked -= ScheduleOpen;
         _menu.ExamsClicked -= ExamsOpen;
         _menu.MainScreenClicked -= MainScreenOpen;
@@ -89,6 +93,8 @@ public class BudgetScreen : MonoBehaviour
         {
             plane.Disable();
         }
+        
+        Load();
 
         _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
     }
@@ -128,21 +134,25 @@ public class BudgetScreen : MonoBehaviour
 
         _addBudgetButton.interactable = AllPlanesActive();
         _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
+        Save();
     }
 
     private void OpenBudgetHistory(BudgetData data)
     {
         _budgetHistory.Enable(data);
+        Save();
     }
 
     private void EditBudget(BudgetData data)
     {
         _editBudgetLimit.EnableScreen(data);
+        Save();
     }
 
     private void OpenLogSpending(BudgetData data)
     {
         _logSpending.Enable(data);
+        Save();
     }
 
     private void UpdateData(BudgetData data)
@@ -157,6 +167,7 @@ public class BudgetScreen : MonoBehaviour
         }
 
         _addBudgetButton.interactable = AllPlanesActive();
+        Save();
     }
 
     private void Delete(BudgetData data)
@@ -174,6 +185,7 @@ public class BudgetScreen : MonoBehaviour
 
         _addBudgetButton.interactable = AllPlanesActive();
         _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
+        Save();
     }
 
     private void MainScreenOpen()
@@ -192,5 +204,71 @@ public class BudgetScreen : MonoBehaviour
     {
         _examsScreen.Enable();
         _screenVisabilityHandler.DisableScreen();
+    }
+
+    private void Save()
+    {
+        try
+        {
+            List<BudgetData> budgetDataList = _planes
+                .Where(plane => plane.IsActive)
+                .Select(plane => plane.Data)
+                .ToList();
+            
+            BudgetDataListWrapper dataWrapper = new BudgetDataListWrapper(budgetDataList);
+
+            string json = JsonUtility.ToJson(dataWrapper, true);
+            File.WriteAllText(savePath, json);
+
+            Debug.Log("Budget data saved successfully.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to save budget data: {e.Message}");
+        }
+    }
+    
+    private void Load()
+    {
+        try
+        {
+            if (File.Exists(savePath))
+            {
+                string json = File.ReadAllText(savePath);
+                BudgetDataListWrapper dataWrapper = JsonUtility.FromJson<BudgetDataListWrapper>(json);
+                List<BudgetData> loadedData = dataWrapper?.Data ?? new List<BudgetData>();
+                
+                foreach (var plane in _planes)
+                {
+                    plane.Disable();
+                }
+                
+                foreach (var data in loadedData)
+                {
+                    EnableBudgetPlane(data);
+                }
+
+                Debug.Log("Budget data loaded successfully.");
+            }
+            else
+            {
+                Debug.Log("No saved budget data found.");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to load budget data: {e.Message}");
+        }
+    }
+
+    [Serializable]
+    public class BudgetDataListWrapper
+    {
+        public List<BudgetData> Data;
+
+        public BudgetDataListWrapper(List<BudgetData> data)
+        {
+            Data = data;
+        }
     }
 }
