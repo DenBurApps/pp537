@@ -8,12 +8,13 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 #if UNITY_IOS
 using UnityEngine.iOS;
-using UnityEngine.Networking;
-
 #endif
-using UnityEngine.SceneManagement;
+
+
 
 public class RemoutConfigLoader : MonoBehaviour
 {
