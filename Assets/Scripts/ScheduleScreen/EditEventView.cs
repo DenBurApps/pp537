@@ -20,7 +20,9 @@ namespace ScheduleScreen
         [SerializeField] private TMP_Text _dateText;
         [SerializeField] private Button _selectDurationButton;
         [SerializeField] private TMP_Text _durationText;
-        [SerializeField] private TMP_InputField _timeInput;
+        //[SerializeField] private TMP_InputField _timeInput;
+        [SerializeField] private Button _selectTimeButton;
+        [SerializeField] private TMP_Text _timeText;
         [SerializeField] private Button _examButton;
         [SerializeField] private Button _saveButton;
         [SerializeField] private Button _deleteButton;
@@ -36,6 +38,7 @@ namespace ScheduleScreen
         public event Action BackClicked;
         public event Action DurationClicked;
         public event Action DeleteClicked;
+        public event Action TimeClicked;
 
         private void Awake()
         {
@@ -47,13 +50,15 @@ namespace ScheduleScreen
             _dateButton.onClick.AddListener(OnDateButtonClicked);
             _nameInput.onValueChanged.AddListener(OnNameInputed);
             _noteInput.onValueChanged.AddListener(OnNoteInputed);
-            _timeInput.onValueChanged.AddListener(ValidateTimeInput);
-            _timeInput.onEndEdit.AddListener(FormatTimeInput);
+            /*_timeInput.onValueChanged.AddListener(ValidateTimeInput);
+            _timeInput.onEndEdit.AddListener(FormatTimeInput);*/
             _saveButton.onClick.AddListener(OnSaveClicked);
             _examButton.onClick.AddListener(OnExamClicked);
             _datePicker.Content.OnSelectionChanged.AddListener(SetDate);
             _selectDurationButton.onClick.AddListener(OnDurationClicked);
+            _selectTimeButton.onClick.AddListener(OnTimeClicked);
             _deleteButton.onClick.AddListener(OnDeleteClicked);
+            _backButton.onClick.AddListener(OnBackClicked);
         }
 
         private void OnDisable()
@@ -61,13 +66,15 @@ namespace ScheduleScreen
             _dateButton.onClick.RemoveListener(OnDateButtonClicked);
             _nameInput.onValueChanged.RemoveListener(OnNameInputed);
             _noteInput.onValueChanged.RemoveListener(OnNoteInputed);
-            _timeInput.onValueChanged.RemoveListener(ValidateTimeInput);
-            _timeInput.onEndEdit.RemoveListener(FormatTimeInput);
+            /*_timeInput.onValueChanged.RemoveListener(ValidateTimeInput);
+            _timeInput.onEndEdit.RemoveListener(FormatTimeInput);*/
             _saveButton.onClick.RemoveListener(OnSaveClicked);
             _examButton.onClick.RemoveListener(OnExamClicked);
             _datePicker.Content.OnSelectionChanged.RemoveListener(SetDate);
             _selectDurationButton.onClick.RemoveListener(OnDurationClicked);
+            _selectTimeButton.onClick.RemoveListener(OnTimeClicked);
             _deleteButton.onClick.RemoveListener(OnDeleteClicked);
+            _backButton.onClick.RemoveListener(OnBackClicked);
         }
 
         public void Enable()
@@ -97,7 +104,7 @@ namespace ScheduleScreen
 
         public void SetTime(string time)
         {
-            _timeInput.text = time;
+            _timeText.text = time;
         }
 
         public void SetDuaration(string duration)
@@ -109,37 +116,7 @@ namespace ScheduleScreen
         {
             _saveButton.interactable = state;
         }
-
-
-        private void ValidateTimeInput(string input)
-        {
-            string timePattern = @"^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
-            bool isValid = Regex.IsMatch(input, timePattern);
-        }
-
-        private void FormatTimeInput(string input)
-        {
-            if (DateTime.TryParseExact(input, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                    out DateTime parsedTime))
-            {
-                var time = parsedTime.ToString("HH:mm");
-                _timeInput.text = time;
-                TimeInputed?.Invoke(time);
-            }
-
-            if (input.Length == 4 && int.TryParse(input, out int numericInput))
-            {
-                int hours = numericInput / 100;
-                int minutes = numericInput % 100;
-
-                if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59)
-                {
-                    var time = $"{hours:D2}:{minutes:D2}";
-                    _timeInput.text = time;
-                    TimeInputed?.Invoke(time);
-                }
-            }
-        }
+        
 
         private void SetDate()
         {
@@ -173,5 +150,7 @@ namespace ScheduleScreen
         private void OnExamClicked() => ExamClicked?.Invoke();
         private void OnSaveClicked() => SaveClicked?.Invoke();
         private void OnDeleteClicked() => DeleteClicked?.Invoke();
+        private void OnTimeClicked() => TimeClicked?.Invoke();
+        private void OnBackClicked() => BackClicked?.Invoke();
     }
 }

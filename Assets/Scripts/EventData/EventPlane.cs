@@ -97,6 +97,12 @@ namespace EventData
             }
         }
 
+        public void UpdatePercentage()
+        {
+            float completionPercentage = EventData.ExamData.GetCompletionPercentage();
+            _examPersentage.text = $"{completionPercentage:F0}%";
+        }
+
         public void SetNextSprite()
         {
             _image.sprite = _nextSprite;

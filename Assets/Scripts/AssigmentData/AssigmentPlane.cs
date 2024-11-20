@@ -70,11 +70,14 @@ namespace AssigmentData
             }
             else
             {
-                //Debug.LogError("Failed to parse date and time for assignment.");
+                Debug.Log("Failed to parse date and time for assignment.");
             }
-
-            _logo.sprite = _iconHolder.GetSpriteByType(Data.IconType);
-            _logo.color = _colorHolder.GetColorByType(Data.ColorType);
+            
+            if (_iconHolder != null && _colorHolder != null)
+            {
+                _logo.sprite = _iconHolder.GetSpriteByType(Data.IconType);
+                _logo.color = _colorHolder.GetColorByType(Data.ColorType);
+            }
         }
 
         public void UpdateText()
@@ -93,8 +96,11 @@ namespace AssigmentData
                // Debug.LogError("Failed to parse date and time for assignment.");
             }
 
-            _logo.sprite = _iconHolder.GetSpriteByType(Data.IconType);
-            _logo.color = _colorHolder.GetColorByType(Data.ColorType);
+            if (_iconHolder != null && _colorHolder != null)
+            {
+                _logo.sprite = _iconHolder.GetSpriteByType(Data.IconType);
+                _logo.color = _colorHolder.GetColorByType(Data.ColorType);
+            }
         }
 
         private void SetChecked()

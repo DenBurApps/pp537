@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using AddEvent;
 using AssigmentData;
 using MainScreen;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace AssigmentDataInputScreen
         [SerializeField] private AssigmentStepHolder _assigmentStepHolder;
         [SerializeField] private List<AssigmentIcon> _icons;
         [SerializeField] private List<AssigmentColor> _colors;
+        [SerializeField] private AddEventTimeInputer _timeInputer;
 
         private string _name;
         private string _subject;
@@ -52,12 +54,14 @@ namespace AssigmentDataInputScreen
             _view.NameInputed += SetName;
             _view.DateInputed += SetDate;
             _view.NoteInputed += SetNote;
-            _view.TimeInputed += SetTime;
+            //_view.TimeInputed += SetTime;
+            _view.TimeClicked += OpenTimeInputer;
             _view.SubjectInputed += SetSubject;
 
             _view.AddStepClicked += AddStep;
             _view.AddSourceClicked += AddSource;
             _view.SaveClicked += SaveData;
+            _timeInputer.ConfirmClicked += SetTime;
             _view.BackClicked += OnBackClicked;
         }
 
@@ -76,13 +80,15 @@ namespace AssigmentDataInputScreen
             _view.NameInputed -= SetName;
             _view.DateInputed -= SetDate;
             _view.NoteInputed -= SetNote;
-            _view.TimeInputed -= SetTime;
+            _view.TimeClicked -= OpenTimeInputer;
+            //  _view.TimeInputed -= SetTime;
             _view.SubjectInputed -= SetSubject;
 
             _view.AddStepClicked -= AddStep;
             _view.AddSourceClicked -= AddSource;
             _view.SaveClicked -= SaveData;
             _view.BackClicked -= OnBackClicked;
+            _timeInputer.ConfirmClicked -= SetTime;
         }
 
         private void Start()
@@ -102,8 +108,12 @@ namespace AssigmentDataInputScreen
 
         public void EnableScreen(AssigmentPlane plane)
         {
+            _view.Enable();
+            ResetValues();
+
             _currentPlane = plane;
 
+            _name = plane.Data.Name;
             _date = plane.Data.Date;
             _timeHr = plane.Data.TimeHr;
             _timeMin = plane.Data.TimeMin;
@@ -127,6 +137,17 @@ namespace AssigmentDataInputScreen
                     SelectCurrentColor(color);
                 }
             }
+
+            _view.SetTime($"{_timeHr}:{_timeMin}");
+            _view.SetDate(_date);
+            _view.SetName(_name);
+            _view.SetNote(_note);
+            _view.SetSubject(_subject);
+        }
+
+        private void OpenTimeInputer()
+        {
+            _timeInputer.gameObject.SetActive(true);
         }
 
         private void SelectCurrentIcon(AssigmentIcon icon)
@@ -199,9 +220,22 @@ namespace AssigmentDataInputScreen
             ValidateInput();
         }
 
-        private void SetTime(string input)
+        private void SetTime(string hr, string min)
         {
-            TryParseTime(input, out _timeHr, out _timeMin);
+            int hrDuration;
+            int minDuration;
+
+            if (int.TryParse(hr, out hrDuration))
+            {
+                _timeHr = hrDuration;
+            }
+
+            if (int.TryParse(min, out minDuration))
+            {
+                _timeMin = minDuration;
+            }
+
+            _view.SetTime($"{hr}:{min}");
             ValidateInput();
         }
 
@@ -226,11 +260,13 @@ namespace AssigmentDataInputScreen
             if (_currentPlane != null)
             {
                 _currentPlane.SetData(assigmentData);
+                Edited?.Invoke();
+                _view.Disable();
+                return;
             }
 
             Saved?.Invoke(assigmentData);
-            Edited?.Invoke();
-            _view.Disable();
+            OnBackClicked();
         }
 
         private void ValidateInput()
@@ -255,21 +291,18 @@ namespace AssigmentDataInputScreen
             _view.CloseCalendar();
             _view.SetDate(_date);
             _view.SetName(_name);
+            _view.SetNote(_note);
             _view.SetSubject(_subject);
-            _view.SetTime(string.Empty);
-        }
+            _view.SetTime("Select time");
 
-        private void TryParseTime(string input, out int hr, out int min)
-        {
-            hr = 0;
-            min = 0;
-
-            string timePattern = @"^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
-            if (Regex.IsMatch(input, timePattern))
+            foreach (var icon in _icons)
             {
-                string[] timeParts = input.Split(':');
-                hr = int.Parse(timeParts[0]);
-                min = int.Parse(timeParts[1]);
+                icon.SetDefault();
+            }
+
+            foreach (var color in _colors)
+            {
+                color.SetDefault();
             }
         }
 

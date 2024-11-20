@@ -53,7 +53,7 @@ namespace AllAssigments
             }
             
             _addAssigmentButton.onClick.AddListener(AddNewAssigment);
-            _addAssigmentScreen.Edited += UpdateAllPlanes;
+            _editAssigmentScreen.Edited += UpdateAllPlanes;
             _addAssigmentScreen.BackEdited += UpdateAllPlanes;
             _editAssigmentScreen.BackEdited += UpdateAllPlanes;
             _backButtonClicked.onClick.AddListener(OnBackClicked);
@@ -62,7 +62,7 @@ namespace AllAssigments
         private void OnDisable()
         {
             _addAssigmentButton.onClick.RemoveListener(AddNewAssigment);
-            _addAssigmentScreen.Edited -= UpdateAllPlanes;
+            _editAssigmentScreen.Edited -= UpdateAllPlanes;
             _addAssigmentScreen.BackEdited -= UpdateAllPlanes;
             _editAssigmentScreen.BackEdited -= UpdateAllPlanes;
             _backButtonClicked.onClick.RemoveListener(OnBackClicked);
@@ -87,11 +87,15 @@ namespace AllAssigments
 
         public void EnableAssigments(List<AssigmentData.AssigmentData> datas)
         {
+            DisableAllAssigments();
+            
             if (datas.Count <= 0)
             {
                 _emptyPlane.gameObject.SetActive(true);
                 return;
             }
+            
+            Debug.Log(datas.Count);
 
             foreach (var data in datas)
             {

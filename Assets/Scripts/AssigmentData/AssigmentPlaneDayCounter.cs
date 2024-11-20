@@ -35,6 +35,12 @@ namespace AssigmentData
                 _text.color = _criticalColor;
                 LowTimeLeft?.Invoke();
             }
+            else
+            {
+                int hoursLate = (int)Math.Abs(timeDifference.TotalHours);
+                _text.text = $"{hoursLate} hours late";
+                _text.color = _criticalColor;
+            }
         }
     }
 }

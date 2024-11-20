@@ -23,6 +23,8 @@ namespace Exams
 
         private ScreenVisabilityHandler _screenVisabilityHandler;
 
+        public event Action<EventData.EventData> NewDataSaved; 
+
         private void Awake()
         {
             _screenVisabilityHandler = GetComponent<ScreenVisabilityHandler>();
@@ -35,6 +37,11 @@ namespace Exams
             _menu.ScheduleClicked += ScheduleOpen;
             _menu.BudgetClicked += BudgetOpen;
             _menu.MainScreenClicked += MainScreenOpen;
+
+            foreach (var plane in _planes)
+            {
+                plane.NewData += data => NewDataSaved?.Invoke(data);
+            }
         }
 
         private void OnDisable()
@@ -55,7 +62,10 @@ namespace Exams
         public void Enable()
         {
             _screenVisabilityHandler.EnableScreen();
+            DisableAllPlanes();
             var datas = _eventHolder.Datas;
+            
+            Debug.Log(_eventHolder.Datas.Count);
 
             if (datas.Count <= 0)
             {
@@ -63,18 +73,30 @@ namespace Exams
                 return;
             }
 
+            var assignedData = _planes
+                .Where(plane => plane.IsActive)
+                .Select(plane => plane.Plane.EventData)
+                .ToHashSet();
+
             foreach (var data in datas)
             {
+                if (assignedData.Contains(data))
+                {
+                    continue;
+                }
+
                 var plane = _planes.FirstOrDefault(plane => !plane.IsActive);
-                
-                if(plane != null)
+
+                if (plane != null)
                 {
                     plane.Enable(data);
+                    assignedData.Add(data);
                 }
             }
-            
+
             _emptyPlane.gameObject.SetActive(ArePlanesActive());
         }
+
 
         private void DisableAllPlanes()
         {

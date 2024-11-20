@@ -37,6 +37,11 @@ namespace EventData
     {
         public List<ExamStep> Steps;
 
+        public ExamData()
+        {
+            Steps = new List<ExamStep>();
+        }
+
         public float GetCompletionPercentage()
         {
             if (Steps == null || Steps.Count == 0)

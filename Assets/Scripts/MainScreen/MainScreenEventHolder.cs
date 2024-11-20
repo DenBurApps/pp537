@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using AddEvent;
 using EventData;
+using Exams;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -22,9 +23,10 @@ namespace MainScreen
         [SerializeField] private AddEventScreen _addEventScreen;
         [SerializeField] private ScheduleScreen.ScheduleScreen _scheduleScreen;
         [SerializeField] private Menu _menu;
+        [SerializeField] private ExamsScreen _examsScreen;
 
         private string _savePath;
-        
+
         public List<EventData.EventData> Datas { get; private set; } = new();
 
         private void Awake()
@@ -41,6 +43,7 @@ namespace MainScreen
             _scheduleScreen.MainScreenClicked += UpdatePlanes;
             _scheduleScreen.PreviousEditedData += RemoveOldData;
             _scheduleScreen.NewSavedData += SaveNewData;
+            _examsScreen.NewDataSaved += SaveNewData;
         }
 
         private void OnDisable()
@@ -52,6 +55,7 @@ namespace MainScreen
             _scheduleScreen.MainScreenClicked -= UpdatePlanes;
             _scheduleScreen.PreviousEditedData -= RemoveOldData;
             _scheduleScreen.NewSavedData -= SaveNewData;
+            _examsScreen.NewDataSaved -= SaveNewData;
         }
 
         private void Start()
@@ -69,8 +73,9 @@ namespace MainScreen
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
 
-            
-            if (DateTime.TryParseExact(data.Date, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime eventDate))
+
+            if (DateTime.TryParseExact(data.Date, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None,
+                    out DateTime eventDate))
             {
                 if (eventDate.Date != DateTime.Today)
                 {
@@ -84,13 +89,14 @@ namespace MainScreen
                 Debug.LogWarning("Invalid date format in data.Data");
                 return;
             }
-            
+
             var availablePlane = _planes.FirstOrDefault(plane => !plane.IsActive);
 
             if (availablePlane != null)
             {
                 availablePlane.Enable();
                 availablePlane.SetData(data);
+                Datas.Add(data);
 
                 DateTime currentTime = DateTime.Now;
                 DateTime eventTime = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day, data.TimeHr,
@@ -121,11 +127,11 @@ namespace MainScreen
             UpdatePlanesDatas();
             EnableTodaysPlanes();
         }
-        
+
         private void UpdatePlanesDatas()
         {
             Datas.Clear();
-            
+
             foreach (var plane in _planes)
             {
                 if (plane.EventData != null)
@@ -133,7 +139,7 @@ namespace MainScreen
                     Datas.Add(plane.EventData);
                 }
             }
-            
+
             Save();
         }
 
@@ -143,23 +149,26 @@ namespace MainScreen
             {
                 Datas.Remove(data);
             }
-            
+
             Save();
         }
 
         private void SaveNewData(EventData.EventData data)
         {
-            Datas.Add(data);
+            if (!Datas.Contains(data))
+                Datas.Add(data);
+            
             Save();
         }
 
         private void EnableTodaysPlanes()
         {
             DisableAllPlanes();
-            
+
             var todaysEvents = Datas.Where(data =>
             {
-                if (DateTime.TryParseExact(data.Date, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime eventDate))
+                if (DateTime.TryParseExact(data.Date, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None,
+                        out DateTime eventDate))
                 {
                     return eventDate.Date == DateTime.Today;
                 }
@@ -169,13 +178,13 @@ namespace MainScreen
                     return false;
                 }
             }).ToList();
-            
+
             if (todaysEvents.Count == 0)
             {
                 _emptyPlane.SetActive(true);
                 return;
             }
-            
+
             _emptyPlane.SetActive(false);
 
             foreach (var data in todaysEvents)
@@ -188,7 +197,8 @@ namespace MainScreen
                     availablePlane.SetData(data);
 
                     DateTime currentTime = DateTime.Now;
-                    DateTime eventTime = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day, data.TimeHr, data.TimeMin, 0);
+                    DateTime eventTime = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day, data.TimeHr,
+                        data.TimeMin, 0);
 
                     if (eventTime > currentTime)
                     {
@@ -238,7 +248,7 @@ namespace MainScreen
                 plane.Reset();
                 plane.Disable();
             }
-            
+
             Save();
         }
 
@@ -253,7 +263,7 @@ namespace MainScreen
             try
             {
                 string jsonData = JsonUtility.ToJson(new ActiveEventDataList(Datas), true);
-                
+
                 File.WriteAllText(_savePath, jsonData);
 
                 Debug.Log($"Data saved successfully to {_savePath}");
@@ -271,7 +281,7 @@ namespace MainScreen
                 if (File.Exists(_savePath))
                 {
                     string jsonData = File.ReadAllText(_savePath);
-            
+
 
                     ActiveEventDataList loadedData = JsonUtility.FromJson<ActiveEventDataList>(jsonData);
                     Datas = loadedData?.Data ?? new List<EventData.EventData>();

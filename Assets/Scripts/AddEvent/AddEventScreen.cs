@@ -9,6 +9,7 @@ namespace AddEvent
     {
         [SerializeField] private AddEventScreenView _view;
         [SerializeField] private AddEventTimeInputer _timeInputer;
+        [SerializeField] private AddEventTimeInputer _timeInputer2;
 
         private string _name;
         private string _date;
@@ -28,13 +29,15 @@ namespace AddEvent
             _view.NameInputed += OnNameInputed;
             _view.NoteInputed += OnNoteInputed;
             _view.DateInputed += OnDateInputed;
-            _view.TimeInputed += SetTime;
+            //  _view.TimeInputed += SetTime;
             _view.DurationClicked += OpenTimeInputer;
+            _view.TimeClicked += OpenTimeInputer2;
             _view.SaveClicked += SaveData;
             _view.ExamClicked += OnExamClicked;
             _view.BackClicked += OnBackClicked;
 
             _timeInputer.ConfirmClicked += OnDurationInputed;
+            _timeInputer2.ConfirmClicked += SetTime;
         }
 
         private void OnDisable()
@@ -42,12 +45,14 @@ namespace AddEvent
             _view.NameInputed -= OnNameInputed;
             _view.NoteInputed -= OnNoteInputed;
             _view.DateInputed -= OnDateInputed;
-            _view.TimeInputed -= SetTime;
+            //_view.TimeInputed -= SetTime;
+            _view.TimeClicked -= OpenTimeInputer2;
             _view.DurationClicked -= OpenTimeInputer;
             _view.SaveClicked -= SaveData;
             _view.ExamClicked -= OnExamClicked;
 
             _timeInputer.ConfirmClicked -= OnDurationInputed;
+            _timeInputer2.ConfirmClicked -= SetTime;
         }
 
         private void Start()
@@ -66,6 +71,17 @@ namespace AddEvent
         private void OpenTimeInputer()
         {
             _timeInputer.gameObject.SetActive(true);
+
+            if (!_timeInputer.gameObject.activeSelf)
+                _timeInputer.gameObject.SetActive(true);
+        }
+
+        private void OpenTimeInputer2()
+        {
+            _timeInputer2.gameObject.SetActive(true);
+            
+            if (!_timeInputer2.gameObject.activeSelf)
+                _timeInputer.gameObject.SetActive(true);
         }
 
         private void OnNameInputed(string name)
@@ -105,24 +121,23 @@ namespace AddEvent
             ValidateInput();
         }
 
-        private void SetTime(string input)
+        private void SetTime(string hr, string min)
         {
-            TryParseTime(input, out _timeHr, out _timeMin);
-            ValidateInput();
-        }
+            int hrDuration;
+            int minDuration;
 
-        private void TryParseTime(string input, out int hr, out int min)
-        {
-            hr = 0;
-            min = 0;
-
-            string timePattern = @"^([01]?[0-9]|2[0-3]):[0-5][0-9]$";
-            if (Regex.IsMatch(input, timePattern))
+            if (int.TryParse(hr, out hrDuration))
             {
-                string[] timeParts = input.Split(':');
-                hr = int.Parse(timeParts[0]);
-                min = int.Parse(timeParts[1]);
+                _timeHr = hrDuration;
             }
+
+            if (int.TryParse(min, out minDuration))
+            {
+                _timeMin = minDuration;
+            }
+
+            _view.SetTime($"{hr}:{min}");
+            ValidateInput();
         }
 
         private void OnExamClicked()
@@ -160,8 +175,8 @@ namespace AddEvent
             _view.SetName(_name);
             _view.SetDate("Select date");
             _view.SetNote(_note);
-            _view.SetDuaration("SelectDuration");
-            _view.SetTime(string.Empty);
+            _view.SetDuaration("Select Duration");
+            _view.SetTime("Select time");
             _view.CloseCalendar();
         }
 

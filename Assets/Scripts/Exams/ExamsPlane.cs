@@ -12,8 +12,9 @@ namespace Exams
         [SerializeField] private EventPlane _plane;
         [SerializeField] private List<ExamStep> _steps;
         [SerializeField] private Button _addStepButton;
-
+        
         public event Action<EventData.EventData> NewData;
+        public EventPlane Plane => _plane;
         public bool IsActive { get; private set; }
 
         private void OnEnable()
@@ -48,6 +49,8 @@ namespace Exams
 
             if (_plane.EventData.ExamData.Steps.Count > 0)
             {
+                Debug.Log(_plane.EventData.ExamData.Steps.Count);
+                
                 foreach (var examStepData in _plane.EventData.ExamData.Steps)
                 {
                     var step = _steps.FirstOrDefault(step => !step.IsActive);
@@ -77,6 +80,7 @@ namespace Exams
             }
             
             NewData?.Invoke(_plane.EventData);
+            _plane.UpdatePercentage();
         }
         
         private void DisableAllSteps()
@@ -89,10 +93,7 @@ namespace Exams
 
         private void UpdateExamData(ExamStep step)
         {
-            if (_plane.EventData.ExamData.Steps.Contains(step.StepData))
-            {
-                _plane.EventData.ExamData.GetCompletionPercentage();
-            }
+            _plane.UpdatePercentage();
             
             NewData?.Invoke(_plane.EventData);
         }

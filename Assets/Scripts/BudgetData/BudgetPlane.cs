@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class BudgetPlane : MonoBehaviour
 {
+    [SerializeField] private Image _filledImage;
     [SerializeField] private TMP_Text _name;
     [SerializeField] private TMP_Text _maxAmount;
     [SerializeField] private Button _logSpendingButton;
@@ -42,13 +43,35 @@ public class BudgetPlane : MonoBehaviour
 
         _name.text = Data.IsYearly ? "Yearly budget" : "Semester budget";
         _maxAmount.text = "$" + Data.SpendAmount + "/" + Data.Amount;
+        
+        UpdateFilledImage();
+        UpdateLogSpendingButton();
+        
         IsActive = true;
+        Data.OnSpendAmountChanged += UpdateUIOnSpendAmountChanged;
     }
 
     public void Disable()
     {
         gameObject.SetActive(false);
         IsActive = false;
+        
+        if (Data != null)
+        {
+            Data.OnSpendAmountChanged -= UpdateUIOnSpendAmountChanged;
+        }
+    }
+    
+    private void UpdateLogSpendingButton()
+    {
+        _logSpendingButton.interactable = Data.SpendAmount < Data.Amount;
+    }
+    
+    private void UpdateUIOnSpendAmountChanged()
+    {
+        _maxAmount.text = "$" + Data.SpendAmount + "/" + Data.Amount;
+        UpdateFilledImage();
+        UpdateLogSpendingButton();
     }
     
     public void SetData(BudgetData data)
@@ -57,6 +80,18 @@ public class BudgetPlane : MonoBehaviour
 
         _name.text = Data.IsYearly ? "Yearly budget" : "Semester budget";
         _maxAmount.text = "$" + Data.SpendAmount + "/" + Data.Amount;
+    }
+    
+    private void UpdateFilledImage()
+    {
+        if (Data.Amount > 0)
+        {
+            _filledImage.fillAmount = (float)Data.SpendAmount / Data.Amount;
+        }
+        else
+        {
+            _filledImage.fillAmount = 0;
+        }
     }
 
     private void OnLogSpendingClicked() => LogSpendingClicked?.Invoke(Data);
@@ -73,6 +108,8 @@ public class BudgetData
     public int SpendAmount;
     public List<SpendingData> SpendingDatas;
     public bool IsYearly;
+    
+    public event Action OnSpendAmountChanged;
 
     public BudgetData(int amount, string name, string startDate, string endDate, bool isYearly)
     {
@@ -85,10 +122,12 @@ public class BudgetData
 
     public void AddSpendAmount(SpendingData data)
     {
-        if (SpendAmount + data.Amount < Amount)
+        if (SpendAmount + data.Amount <= Amount)
         {
             SpendingDatas.Add(data);
             SpendAmount += data.Amount;
+            
+            OnSpendAmountChanged?.Invoke();
         }
     }
 }

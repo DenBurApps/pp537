@@ -73,6 +73,9 @@ namespace MainScreen
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
 
+            if (!Datas.Contains(data))
+                Datas.Add(data);
+            
             if (data.IsSelected)
                 return;
 
@@ -82,9 +85,6 @@ namespace MainScreen
             {
                 availablePlane.Enable();
                 availablePlane.SetData(data);
-
-                if (!Datas.Contains(data))
-                    Datas.Add(data);
             }
 
             Save();

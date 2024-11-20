@@ -48,7 +48,8 @@ namespace Exams
                 _completeButton.image.sprite = _unselectedSprite;
                 StepData.IsCompleted = false;
             }
-            
+
+            _name.text = data.Name;
             gameObject.SetActive(true);
             IsActive = true;
         }

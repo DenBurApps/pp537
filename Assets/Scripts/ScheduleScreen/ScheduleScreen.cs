@@ -54,8 +54,9 @@ namespace ScheduleScreen
             _datePicker.Content.OnSelectionChanged.AddListener(SelectDate);
             _editEvent.Deleted += DeletePlane;
             _addEventButton.onClick.AddListener(AddEvent);
-            _menu.MainScreenClicked += (() => MainScreenClicked?.Invoke());
+            _menu.MainScreenClicked += OpenMainScreen;
             _editEvent.Saved += SavedNewData;
+            _editEvent.BackClicked += _screenVisabilityHandler.EnableScreen;
             _addEventScreen.BackClicked += Enable;
             _menu.ExamsClicked += OpenExams;
             _menu.BudgetClicked += OpenBudget;
@@ -74,6 +75,8 @@ namespace ScheduleScreen
             _editEvent.Saved -= SavedNewData;
             _addEventScreen.BackClicked -= Enable;
             _menu.ExamsClicked -= OpenExams;
+            _menu.MainScreenClicked -= OpenMainScreen;
+            _editEvent.BackClicked -= _screenVisabilityHandler.EnableScreen;
             _menu.BudgetClicked -= OpenBudget;
         }
 
@@ -229,6 +232,12 @@ namespace ScheduleScreen
         {
             _screenVisabilityHandler.DisableScreen();
             _addEventScreen.EnableScreen();
+        }
+
+        private void OpenMainScreen()
+        {
+            MainScreenClicked?.Invoke();
+            _screenVisabilityHandler.DisableScreen();
         }
 
         private void OpenExams()

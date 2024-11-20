@@ -14,7 +14,7 @@ namespace MainScreen
         [SerializeField] private AllAssigments.AllAssigmentsScreen _allAssigmentsScreen;
         [SerializeField] private Button _settingsButton;
         [SerializeField] private Settings _settings;
-        
+
         private ScreenVisabilityHandler _screenVisabilityHandler;
 
         private void Awake()
@@ -25,7 +25,7 @@ namespace MainScreen
         private void OnEnable()
         {
             _menu.ScheduleClicked += OpenSchedule;
-            //_menu.ExamsClicked += OpenExams;
+            _menu.ExamsClicked += OpenExams;
             _menu.BudgetClicked += OpenBudget;
             _allAssigmentsScreen.BackClicked += _screenVisabilityHandler.EnableScreen;
             _settingsButton.onClick.AddListener(OpenSettings);
@@ -35,7 +35,7 @@ namespace MainScreen
         private void OnDisable()
         {
             _menu.ScheduleClicked -= OpenSchedule;
-            //_menu.ExamsClicked -= OpenExams;
+            _menu.ExamsClicked -= OpenExams;
             _menu.BudgetClicked -= OpenBudget;
             _allAssigmentsScreen.BackClicked -= _screenVisabilityHandler.EnableScreen;
             _settingsButton.onClick.RemoveListener(OpenSettings);

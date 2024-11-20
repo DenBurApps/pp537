@@ -96,6 +96,7 @@ public class EditBudgetLimit : MonoBehaviour
 
         _currentData = data;
         ValidateInput();
+        _datePicker.gameObject.SetActive(false);
     }
 
     private void SetAmount(string amount)
