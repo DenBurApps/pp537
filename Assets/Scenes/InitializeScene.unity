@@ -289,10 +289,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 087e1169d18a5144189062584fdec8c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _key: 
+  _key: X9SpLHo4SL74TCYbd7njQj
   _allConfigData:
-    link: 
-    usePrivacy: 0
+    useMock: 0
+    netApiKey: 
+    privacyLink: 
+    termsLink: 
 --- !u!4 &1042327367
 Transform:
   m_ObjectHideFlags: 0

@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 #if UNITY_IOS
 using UnityEngine.iOS;
+using UnityEngine.Networking;
+
 #endif
 using UnityEngine.SceneManagement;
 
@@ -17,6 +19,9 @@ public class RemoutConfigLoader : MonoBehaviour
 {
     [SerializeField] private string _key;
     [SerializeField] private ConfigData _allConfigData;
+    private const string _url = "https://pro.ip-api.com/json/";
+    private const string _ipApiUrl = "https://api.ipify.org";
+    private string _country;
     private bool _showTerms = true;
     private static FlagsmithClient _flagsmithClient;
 
@@ -40,14 +45,19 @@ public class RemoutConfigLoader : MonoBehaviour
     {
         string HtmlText = GetHtmlFromUri("http://google.com");
 
-        Debug.Log("Google result: " + HtmlText);
-
         if (HtmlText != "")
         {
             if (_key != "")
             {
-                Debug.Log("Loading remote config");
-                LoadRemoutConfig();
+                if (PlayerPrefs.HasKey("link"))
+                {
+                    _showTerms = false;
+                    LoadScene();
+                }
+                else
+                {
+                    LoadRemoutConfig();
+                }
             }
             else
             {
@@ -58,7 +68,6 @@ public class RemoutConfigLoader : MonoBehaviour
 
         else
         {
-            Debug.Log("No internet");
             LoadScene();
         }
     }
@@ -77,7 +86,6 @@ public class RemoutConfigLoader : MonoBehaviour
             LoadScene();
             return;
         }
-
         string values = await flags.GetFeatureValue("config");
         if (values == null || values == "")
         {
@@ -85,7 +93,6 @@ public class RemoutConfigLoader : MonoBehaviour
             LoadScene();
             return;
         }
-
         Debug.Log("Loaded");
         ProcessJsonResponse(values);
     }
@@ -93,22 +100,96 @@ public class RemoutConfigLoader : MonoBehaviour
     private void ProcessJsonResponse(string jsonResponse)
     {
         ConfigData config = JsonConvert.DeserializeObject<ConfigData>(jsonResponse);
-        _allConfigData.link = config.link;
-        _allConfigData.usePrivacy = config.usePrivacy;
-
-        Debug.Log("link's value from Config: " + _allConfigData.link);
-        Debug.Log("useprivacy's value from Config: " + _allConfigData.usePrivacy);
-
-        _showTerms = _allConfigData.usePrivacy;
-        //Место для сохранения ссылки (Сохранять в плеер префс нельзя поскольку сброс данных приложения обнуляет эту информацию)
-
-        //var reg = SaveSystem.LoadData<RegistrationSaveData>();
-        LinkSaver.Link = _allConfigData.link;
-        LinkSaver.SaveLink(_allConfigData.link);
-        //reg.Link = _allConfigData.link;
-        //SaveSystem.SaveData(reg);
-        LoadScene();
+        _allConfigData.useMock = config.useMock;
+        _allConfigData.netApiKey = config.netApiKey;
+        _allConfigData.termsLink = config.termsLink;
+        _allConfigData.privacyLink = config.privacyLink;
+        _allConfigData.data = config.data;
+        if (_allConfigData.useMock)
+        {
+            LoadScene();
+        }
+        else
+        {
+            StartCoroutine(CheckInfo(_allConfigData.netApiKey));
+        }
     }
+
+    public IEnumerator CheckInfo(string apiKey)
+    {
+        string address = null;
+
+        // Получаем IP-адрес
+        yield return StartCoroutine(GetIpAddress(result => address = result));
+
+        // Если адрес получен, продолжаем
+        if (!string.IsNullOrEmpty(address))
+        {
+            yield return StartCoroutine(GetCountryCode(address, apiKey));
+
+            // Проверяем наличие кода страны в конфигурации
+            if (_allConfigData.data != null && _allConfigData.data.ContainsKey(_country))
+            {
+                string link = _allConfigData.data[_country];
+                Debug.Log($"Link for country code {_country}: {link}");
+                _showTerms = false;
+                PlayerPrefs.SetString("link", link);
+                LoadScene();
+            }
+            else
+            {
+                Debug.LogWarning($"Country code {_country} not found in config.");
+                LoadScene();
+            }
+        }
+        else
+        {
+            Debug.LogError("IP address could not be retrieved.");
+            LoadScene();
+        }
+    }
+
+    private IEnumerator GetIpAddress(System.Action<string> callback)
+    {
+        using (UnityWebRequest request = UnityWebRequest.Get(_ipApiUrl))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"Error getting IP address: {request.error}");
+                callback(null); // Возвращаем null, если произошла ошибка
+            }
+            else
+            {
+                string ipAddress = request.downloadHandler.text.Trim();
+                callback(ipAddress); // Возвращаем IP-адрес через callback
+            }
+        }
+    }
+
+    private IEnumerator GetCountryCode(string address, string apiKey)
+    {
+        using (UnityWebRequest request = UnityWebRequest.Get($"{_url}{address}?key={apiKey}"))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"Error: {request.error}");
+            }
+            else
+            {
+                var responseBody = request.downloadHandler.text;
+                var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseBody);
+                string code = jsonResponse["countryCode"].ToString();
+                _country = code;
+                Debug.Log($"Country Code: {code}");
+            }
+        }
+    }
+
+
 
     private void LoadScene()
     {
@@ -153,6 +234,9 @@ public class RemoutConfigLoader : MonoBehaviour
 [Serializable]
 public class ConfigData
 {
-    public string link;
-    public bool usePrivacy;
+    public bool useMock;
+    public string netApiKey;
+    public string privacyLink;
+    public string termsLink;
+    public Dictionary<string, string> data;
 }
