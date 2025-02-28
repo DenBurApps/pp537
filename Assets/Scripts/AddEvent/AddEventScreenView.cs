@@ -3,9 +3,9 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Bitsplash.DatePicker;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace AddEvent
 {
@@ -22,7 +22,6 @@ namespace AddEvent
         [SerializeField] private TMP_Text _dateText;
         [SerializeField] private Button _selectDurationButton;
         [SerializeField] private TMP_Text _durationText;
-        //[SerializeField] private TMP_InputField _timeInput;
         [SerializeField] private Button _selectTimeButton;
         [SerializeField] private TMP_Text _timeText;
         [SerializeField] private Button _examButton;
@@ -33,12 +32,11 @@ namespace AddEvent
         public event Action<string> NameInputed;
         public event Action<string> NoteInputed;
         public event Action<string> DateInputed;
-        public event Action<string> TimeInputed;
+        public event Action TimeClicked;
         public event Action ExamClicked;
         public event Action SaveClicked;
         public event Action BackClicked;
         public event Action DurationClicked;
-        public event Action TimeClicked;
 
         private void Awake()
         {
@@ -50,14 +48,19 @@ namespace AddEvent
             _dateButton.onClick.AddListener(OnDateButtonClicked);
             _nameInput.onValueChanged.AddListener(OnNameInputed);
             _noteInput.onValueChanged.AddListener(OnNoteInputed);
-            /*_timeInput.onValueChanged.AddListener(ValidateTimeInput);
-            _timeInput.onEndEdit.AddListener(FormatTimeInput);*/
             _saveButton.onClick.AddListener(OnSaveClicked);
             _examButton.onClick.AddListener(OnExamClicked);
             _datePicker.Content.OnSelectionChanged.AddListener(SetDate);
             _selectDurationButton.onClick.AddListener(OnDurationClicked);
             _selectTimeButton.onClick.AddListener(OnTimeClicked);
             _backButton.onClick.AddListener(OnBackClicked);
+
+            AddButtonPunchAnimation(_dateButton);
+            AddButtonPunchAnimation(_selectDurationButton);
+            AddButtonPunchAnimation(_selectTimeButton);
+            AddButtonPunchAnimation(_examButton);
+            AddButtonPunchAnimation(_saveButton);
+            AddButtonPunchAnimation(_backButton);
         }
 
         private void OnDisable()
@@ -65,8 +68,6 @@ namespace AddEvent
             _dateButton.onClick.RemoveListener(OnDateButtonClicked);
             _nameInput.onValueChanged.RemoveListener(OnNameInputed);
             _noteInput.onValueChanged.RemoveListener(OnNoteInputed);
-            /*_timeInput.onValueChanged.RemoveListener(ValidateTimeInput);
-            _timeInput.onEndEdit.RemoveListener(FormatTimeInput);*/
             _saveButton.onClick.RemoveListener(OnSaveClicked);
             _examButton.onClick.RemoveListener(OnExamClicked);
             _datePicker.Content.OnSelectionChanged.RemoveListener(SetDate);
@@ -75,14 +76,60 @@ namespace AddEvent
             _backButton.onClick.RemoveListener(OnBackClicked);
         }
 
+        private void AddButtonPunchAnimation(Button button)
+        {
+            button.onClick.AddListener(() => { button.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 2, 0.5f); });
+        }
+
         public void Enable()
         {
             _screenVisabilityHandler.EnableScreen();
+            AnimateInputFields();
         }
 
         public void Disable()
         {
             _screenVisabilityHandler.DisableScreen();
+        }
+
+        private void AnimateInputFields()
+        {
+            float delay = 0.1f;
+
+            _nameInput.transform.localScale = Vector3.zero;
+            _nameInput.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack)
+                .SetDelay(delay);
+
+            _noteInput.transform.localScale = Vector3.zero;
+            _noteInput.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack)
+                .SetDelay(delay * 2);
+
+            _dateButton.transform.localScale = Vector3.zero;
+            _dateButton.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack)
+                .SetDelay(delay * 3);
+
+            _selectTimeButton.transform.localScale = Vector3.zero;
+            _selectTimeButton.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack)
+                .SetDelay(delay * 4);
+
+            _selectDurationButton.transform.localScale = Vector3.zero;
+            _selectDurationButton.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack)
+                .SetDelay(delay * 5);
+
+            _examButton.transform.localScale = Vector3.zero;
+            _examButton.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack)
+                .SetDelay(delay * 6);
+
+            _saveButton.transform.localScale = Vector3.zero;
+            _saveButton.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack)
+                .SetDelay(delay * 7);
         }
 
         public void SetName(string name)
@@ -98,16 +145,19 @@ namespace AddEvent
         public void SetDate(string date)
         {
             _dateText.text = date;
+            _dateText.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 2, 0.5f);
         }
 
         public void SetTime(string time)
         {
             _timeText.text = time;
+            _timeText.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 2, 0.5f);
         }
 
         public void SetDuaration(string duration)
         {
             _durationText.text = duration;
+            _durationText.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 2, 0.5f);
         }
 
         public void ToggleSaveButton(bool state)
@@ -132,17 +182,26 @@ namespace AddEvent
 
         public void CloseCalendar()
         {
-            _datePicker.gameObject.SetActive(false);
+            _datePicker.transform.DOScale(0f, 0.3f)
+                .SetEase(Ease.InBack)
+                .OnComplete(() => _datePicker.gameObject.SetActive(false));
         }
 
         public void ToggleExamSprite(bool status)
         {
             _examButton.image.sprite = status ? _selectedSprite : _notSelectedSprite;
+            _examButton.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 2, 0.5f);
         }
 
         private void OnNameInputed(string input) => NameInputed?.Invoke(input);
         private void OnNoteInputed(string input) => NoteInputed?.Invoke(input);
-        private void OnDateButtonClicked() => _datePicker.gameObject.SetActive(true);
+
+        private void OnDateButtonClicked()
+        {
+            _datePicker.gameObject.SetActive(true);
+            _datePicker.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+        }
+
         private void OnDurationClicked() => DurationClicked?.Invoke();
         private void OnTimeClicked() => TimeClicked?.Invoke();
         private void OnExamClicked() => ExamClicked?.Invoke();

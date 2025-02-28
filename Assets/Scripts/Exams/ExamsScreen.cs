@@ -5,6 +5,7 @@ using AddEvent;
 using MainScreen;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace Exams
 {
@@ -21,6 +22,12 @@ namespace Exams
         [SerializeField] private MainScreenView _mainScreenView;
         [SerializeField] private ScheduleScreen.ScheduleScreen _scheduleScreen;
 
+        [Header("Animation Settings")]
+        [SerializeField] private float _planeEntryDuration = 0.5f;
+        [SerializeField] private Ease _planeEntryEase = Ease.OutBack;
+        [SerializeField] private float _screenTransitionDuration = 0.3f;
+        [SerializeField] private Ease _screenTransitionEase = Ease.InOutQuad;
+
         private ScreenVisabilityHandler _screenVisabilityHandler;
 
         public event Action<EventData.EventData> NewDataSaved; 
@@ -28,6 +35,13 @@ namespace Exams
         private void Awake()
         {
             _screenVisabilityHandler = GetComponent<ScreenVisabilityHandler>();
+        }
+
+        private void Start()
+        {
+            transform.localScale = Vector3.zero;
+            _screenVisabilityHandler.DisableScreen();
+            DisableAllPlanes();
         }
 
         private void OnEnable()
@@ -53,14 +67,11 @@ namespace Exams
             _menu.MainScreenClicked -= MainScreenOpen;
         }
 
-        private void Start()
-        {
-            _screenVisabilityHandler.DisableScreen();
-            DisableAllPlanes();
-        }
-
         public void Enable()
         {
+            transform.DOScale(1f, _screenTransitionDuration)
+                .SetEase(_screenTransitionEase);
+
             _screenVisabilityHandler.EnableScreen();
             DisableAllPlanes();
             var datas = _eventHolder.Datas;
@@ -69,7 +80,10 @@ namespace Exams
 
             if (datas.Count <= 0)
             {
+                _emptyPlane.transform.localScale = Vector3.zero;
                 _emptyPlane.gameObject.SetActive(true);
+                _emptyPlane.transform.DOScale(1f, _planeEntryDuration)
+                    .SetEase(_planeEntryEase);
                 return;
             }
 
@@ -77,15 +91,16 @@ namespace Exams
                 .Where(plane => plane.IsActive)
                 .Select(plane => plane.Plane.EventData)
                 .ToHashSet();
-
-            foreach (var data in datas)
+            
+            for (int i = 0; i < datas.Count; i++)
             {
+                var data = datas[i];
                 if (assignedData.Contains(data))
                 {
                     continue;
                 }
 
-                var plane = _planes.FirstOrDefault(plane => !plane.IsActive);
+                var plane = _planes.FirstOrDefault(p => !p.IsActive);
 
                 if (plane != null)
                 {
@@ -96,7 +111,6 @@ namespace Exams
 
             _emptyPlane.gameObject.SetActive(ArePlanesActive());
         }
-
 
         private void DisableAllPlanes()
         {
@@ -114,26 +128,48 @@ namespace Exams
 
         private void AddEvent()
         {
-            _addEventScreen.EnableScreen();
-            _screenVisabilityHandler.DisableScreen();
+            transform.DOScale(0f, _screenTransitionDuration)
+                .SetEase(_screenTransitionEase)
+                .OnComplete(() => 
+                {
+                    _addEventScreen.EnableScreen();
+                    _screenVisabilityHandler.DisableScreen();
+                });
+
+            _addEventButton.transform.DOShakeScale(0.3f, 0.5f);
         }
         
         private void MainScreenOpen()
         {
-            _screenVisabilityHandler.DisableScreen();
-            _mainScreenView.Enable();
+            transform.DOScale(0f, _screenTransitionDuration)
+                .SetEase(_screenTransitionEase)
+                .OnComplete(() => 
+                {
+                    _screenVisabilityHandler.DisableScreen();
+                    _mainScreenView.Enable();
+                });
         }
 
         private void ScheduleOpen()
         {
-            _screenVisabilityHandler.DisableScreen();
-            _scheduleScreen.Enable();
+            transform.DOScale(0f, _screenTransitionDuration)
+                .SetEase(_screenTransitionEase)
+                .OnComplete(() => 
+                {
+                    _screenVisabilityHandler.DisableScreen();
+                    _scheduleScreen.Enable();
+                });
         }
 
         private void BudgetOpen()
         {
-            _budgetScreen.Enable();
-            _screenVisabilityHandler.DisableScreen();
+            transform.DOScale(0f, _screenTransitionDuration)
+                .SetEase(_screenTransitionEase)
+                .OnComplete(() => 
+                {
+                    _budgetScreen.Enable();
+                    _screenVisabilityHandler.DisableScreen();
+                });
         }
     }
 }

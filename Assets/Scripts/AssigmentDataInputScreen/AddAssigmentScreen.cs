@@ -5,6 +5,7 @@ using AddEvent;
 using AssigmentData;
 using MainScreen;
 using UnityEngine;
+using DG.Tweening;
 
 namespace AssigmentDataInputScreen
 {
@@ -18,6 +19,10 @@ namespace AssigmentDataInputScreen
         [SerializeField] private List<AssigmentIcon> _icons;
         [SerializeField] private List<AssigmentColor> _colors;
         [SerializeField] private AddEventTimeInputer _timeInputer;
+
+        [Header("Animation Settings")]
+        [SerializeField] private float _animationDuration = 0.3f;
+        [SerializeField] private Ease _animationEase = Ease.OutQuad;
 
         private string _name;
         private string _subject;
@@ -54,7 +59,6 @@ namespace AssigmentDataInputScreen
             _view.NameInputed += SetName;
             _view.DateInputed += SetDate;
             _view.NoteInputed += SetNote;
-            //_view.TimeInputed += SetTime;
             _view.TimeClicked += OpenTimeInputer;
             _view.SubjectInputed += SetSubject;
 
@@ -81,7 +85,6 @@ namespace AssigmentDataInputScreen
             _view.DateInputed -= SetDate;
             _view.NoteInputed -= SetNote;
             _view.TimeClicked -= OpenTimeInputer;
-            //  _view.TimeInputed -= SetTime;
             _view.SubjectInputed -= SetSubject;
 
             _view.AddStepClicked -= AddStep;
@@ -98,6 +101,39 @@ namespace AssigmentDataInputScreen
             _assigmentStepHolder.gameObject.SetActive(false);
             ResetValues();
             ValidateInput();
+        }
+
+        private void AddAnimatedTransition(GameObject targetObject)
+        {
+            // Slide and scale in animation
+            targetObject.transform.localPosition = new Vector3(0, -Screen.height, 0);
+            targetObject.SetActive(true);
+            targetObject.transform.DOLocalMoveY(0, _animationDuration)
+                .SetEase(_animationEase);
+            
+            targetObject.transform.localScale = Vector3.zero;
+            targetObject.transform.DOScale(1f, _animationDuration)
+                .SetEase(Ease.OutBack);
+        }
+
+        private void AddAnimatedPunchScale(Transform targetTransform)
+        {
+            targetTransform.DOPunchScale(Vector3.one * 0.2f, _animationDuration, 2, 1f)
+                .SetEase(_animationEase);
+        }
+
+        private void AddAnimatedSourceStep(GameObject targetObject)
+        {
+            // Simply activate the object without any animation
+            if (!targetObject.activeSelf)
+            {
+                // Reset position to center of screen
+                targetObject.transform.localPosition = Vector3.zero;
+                targetObject.transform.localScale = Vector3.one;
+                
+                // Activate the object
+                targetObject.SetActive(true);
+            }
         }
 
         public void EnableScreen()
@@ -150,6 +186,26 @@ namespace AssigmentDataInputScreen
             _timeInputer.gameObject.SetActive(true);
         }
 
+        private void AddStep()
+        {
+            if (!_assigmentStepHolder.isActiveAndEnabled)
+            {
+                AddAnimatedSourceStep(_assigmentStepHolder.gameObject);
+            }
+
+            _assigmentStepHolder.EnableStep();
+        }
+
+        private void AddSource()
+        {
+            if (!_assigmentSourceHolder.isActiveAndEnabled)
+            {
+                AddAnimatedSourceStep(_assigmentSourceHolder.gameObject);
+            }
+
+            _assigmentSourceHolder.EnableSource();
+        }
+
         private void SelectCurrentIcon(AssigmentIcon icon)
         {
             if (_currentIcon != null)
@@ -160,6 +216,10 @@ namespace AssigmentDataInputScreen
             _currentIcon = icon;
             _selectedIconType = _currentIcon.Type;
             _currentIcon.SetSelected(_selectedIconColor);
+            
+            // Add a punch scale animation to the selected icon
+            AddAnimatedPunchScale(_currentIcon.transform);
+            
             ValidateInput();
         }
 
@@ -173,27 +233,11 @@ namespace AssigmentDataInputScreen
             _currentColor = color;
             _selectedColorType = _currentColor.Type;
             _currentColor.SetSelected();
+            
+            // Add a punch scale animation to the selected color
+            AddAnimatedPunchScale(_currentColor.transform);
+            
             ValidateInput();
-        }
-
-        private void AddStep()
-        {
-            if (!_assigmentStepHolder.isActiveAndEnabled)
-            {
-                _assigmentStepHolder.gameObject.SetActive(true);
-            }
-
-            _assigmentStepHolder.EnableStep();
-        }
-
-        private void AddSource()
-        {
-            if (!_assigmentSourceHolder.isActiveAndEnabled)
-            {
-                _assigmentSourceHolder.gameObject.SetActive(true);
-            }
-
-            _assigmentSourceHolder.EnableSource();
         }
 
         private void SetName(string name)
@@ -257,11 +301,25 @@ namespace AssigmentDataInputScreen
                 assigmentData.StepDatas = steps;
             }
 
+            transform.DOShakePosition(_animationDuration, new Vector3(10f, 0, 0), 10, 90f)
+                .SetEase(Ease.InOutQuad);
+
             if (_currentPlane != null)
             {
                 _currentPlane.SetData(assigmentData);
                 Edited?.Invoke();
-                _view.Disable();
+                
+                var canvasGroup = _view.GetComponent<CanvasGroup>();
+                if (canvasGroup != null)
+                {
+                    canvasGroup.DOFade(0, _animationDuration)
+                        .OnComplete(() => _view.Disable());
+                }
+                else
+                {
+                    _view.transform.DOScale(0, _animationDuration)
+                        .OnComplete(() => _view.Disable());
+                }
                 return;
             }
 
@@ -308,6 +366,9 @@ namespace AssigmentDataInputScreen
 
         private void OnBackClicked()
         {
+            transform.DOShakeRotation(_animationDuration, new Vector3(0, 0, 10f), 10, 90f)
+                .SetEase(Ease.InOutQuad);
+
             BackEdited?.Invoke();
             _view.Disable();
         }

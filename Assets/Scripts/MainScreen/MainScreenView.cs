@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace MainScreen
 {
@@ -15,11 +16,23 @@ namespace MainScreen
         [SerializeField] private Button _settingsButton;
         [SerializeField] private Settings _settings;
 
+        [Header("Animation Settings")]
+        [SerializeField] private float _transitionDuration = 0.5f;
+        [SerializeField] private Ease _transitionEase = Ease.OutQuad;
+
         private ScreenVisabilityHandler _screenVisabilityHandler;
+        private CanvasGroup _canvasGroup;
 
         private void Awake()
         {
             _screenVisabilityHandler = GetComponent<ScreenVisabilityHandler>();
+            _canvasGroup = GetComponent<CanvasGroup>();
+
+            // Ensure CanvasGroup component exists
+            if (_canvasGroup == null)
+            {
+                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
         }
 
         private void OnEnable()
@@ -45,11 +58,40 @@ namespace MainScreen
         public void Enable()
         {
             _screenVisabilityHandler.EnableScreen();
+            
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = 0f;
+                _canvasGroup.transform.localScale = Vector3.one * 0.9f;
+
+                _canvasGroup.DOFade(1f, _transitionDuration)
+                    .SetEase(_transitionEase);
+
+                _canvasGroup.transform.DOScale(1f, _transitionDuration)
+                    .SetEase(_transitionEase);
+            }
         }
 
         public void Disable()
         {
-            _screenVisabilityHandler.DisableScreen();
+            // Animate screen disable with fade and scale
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.DOFade(0f, _transitionDuration)
+                    .SetEase(_transitionEase)
+                    .OnComplete(() => 
+                    {
+                        _screenVisabilityHandler.DisableScreen();
+                        _canvasGroup.transform.localScale = Vector3.one;
+                    });
+
+                _canvasGroup.transform.DOScale(0.9f, _transitionDuration)
+                    .SetEase(_transitionEase);
+            }
+            else
+            {
+                _screenVisabilityHandler.DisableScreen();
+            }
         }
 
         private void OpenExams()
@@ -74,6 +116,17 @@ namespace MainScreen
         {
             _settings.ShowSettings();
             Disable();
+        }
+
+        // Optional: Method to cancel any running animations
+        private void CancelAnimations()
+        {
+            _canvasGroup?.DOKill();
+        }
+
+        private void OnDestroy()
+        {
+            CancelAnimations();
         }
     }
 }

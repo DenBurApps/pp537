@@ -2,6 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using EventData;
 using UnityEngine;
+using DG.Tweening;
 
 namespace AddEvent
 {
@@ -29,7 +30,6 @@ namespace AddEvent
             _view.NameInputed += OnNameInputed;
             _view.NoteInputed += OnNoteInputed;
             _view.DateInputed += OnDateInputed;
-            //  _view.TimeInputed += SetTime;
             _view.DurationClicked += OpenTimeInputer;
             _view.TimeClicked += OpenTimeInputer2;
             _view.SaveClicked += SaveData;
@@ -45,7 +45,6 @@ namespace AddEvent
             _view.NameInputed -= OnNameInputed;
             _view.NoteInputed -= OnNoteInputed;
             _view.DateInputed -= OnDateInputed;
-            //_view.TimeInputed -= SetTime;
             _view.TimeClicked -= OpenTimeInputer2;
             _view.DurationClicked -= OpenTimeInputer;
             _view.SaveClicked -= SaveData;
@@ -65,6 +64,11 @@ namespace AddEvent
         {
             ResetValues();
             _view.Enable();
+            
+            transform.localScale = Vector3.zero;
+            transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack);
+            
             ValidateInput();
         }
 
@@ -72,16 +76,18 @@ namespace AddEvent
         {
             _timeInputer.gameObject.SetActive(true);
 
-            if (!_timeInputer.gameObject.activeSelf)
-                _timeInputer.gameObject.SetActive(true);
+            _timeInputer.transform.localScale = Vector3.zero;
+            _timeInputer.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack);
         }
 
         private void OpenTimeInputer2()
         {
             _timeInputer2.gameObject.SetActive(true);
             
-            if (!_timeInputer2.gameObject.activeSelf)
-                _timeInputer.gameObject.SetActive(true);
+            _timeInputer2.transform.localScale = Vector3.zero;
+            _timeInputer2.transform.DOScale(1f, 0.3f)
+                .SetEase(Ease.OutBack);
         }
 
         private void OnNameInputed(string name)
@@ -142,25 +148,21 @@ namespace AddEvent
 
         private void OnExamClicked()
         {
-            if (!_isExam)
-            {
-                _isExam = true;
-            }
-            else
-            {
-                _isExam = false;
-            }
-
+            _isExam = !_isExam;
             _view.ToggleExamSprite(_isExam);
         }
 
         private void SaveData()
         {
-            var eventData = new EventData.EventData(_timeHr, _timeMin, _date, _name, _note, _durationHr, _durationMin,
-                _isExam);
+            var eventData = new EventData.EventData(_timeHr, _timeMin, _date, _name, _note, _durationHr, _durationMin, _isExam);
 
-            Saved?.Invoke(eventData);
-            _view.Disable();
+            transform.DOScale(0.8f, 0.2f)
+                .SetEase(Ease.InBack)
+                .OnComplete(() => {
+                    Saved?.Invoke(eventData);
+                    _view.Disable();
+                    transform.localScale = Vector3.one;
+                });
         }
 
         private void ResetValues()
@@ -173,24 +175,30 @@ namespace AddEvent
             _durationHr = 0;
             _durationMin = 0;
             _view.SetName(_name);
-            _view.SetDate("Select date");
+            _view.SetDate("Choose date");
             _view.SetNote(_note);
-            _view.SetDuaration("Select Duration");
-            _view.SetTime("Select time");
+            _view.SetDuaration("Choose duration");
+            _view.SetTime("Choose time");
             _view.CloseCalendar();
         }
 
         private void ValidateInput()
         {
-            bool isValid = !string.IsNullOrEmpty(_name) && !string.IsNullOrEmpty(_date) && !string.IsNullOrEmpty(_note);
+            bool isValid = !string.IsNullOrEmpty(_name) && 
+                           !string.IsNullOrEmpty(_date) && 
+                           !string.IsNullOrEmpty(_note);
 
             _view.ToggleSaveButton(isValid);
         }
 
         private void OnBackClicked()
         {
-            BackClicked?.Invoke();
-            _view.Disable();
+            transform.DOScale(0f, 0.3f)
+                .SetEase(Ease.InBack)
+                .OnComplete(() => {
+                    BackClicked?.Invoke();
+                    _view.Disable();
+                });
         }
     }
 }

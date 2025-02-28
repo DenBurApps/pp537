@@ -3,30 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
-public class SceneLoader : MonoBehaviour
+namespace RemoutConfig
 {
-    [SerializeField] private RemoutConfigLoader _loader;
-
-    private void OnEnable()
+    public class SceneLoader : MonoBehaviour
     {
-        _loader.ConfigLoadEnded += OnConfigLoadEnded;
-    }
+        [SerializeField] private RemoutConfigLoader _loader;
 
-    private void OnDisable()
-    {
-        _loader.ConfigLoadEnded -= OnConfigLoadEnded;
-    }
-
-    private void OnConfigLoadEnded(bool showPrivacy)
-    {
-        if (showPrivacy)
+        private void OnEnable()
         {
-            SceneManager.LoadScene("MainScene");
+            _loader.ConfigLoadEnded += OnConfigLoadEnded;
         }
-        else
+
+        private void OnDisable()
         {
-            SceneManager.LoadScene("TestScene");
+            _loader.ConfigLoadEnded -= OnConfigLoadEnded;
+        }
+
+        private void OnConfigLoadEnded(bool showPrivacy)
+        {
+            if (showPrivacy)
+            {
+                SceneManager.LoadScene("MainScene");
+            }
+            else
+            {
+                SceneManager.LoadScene("TestScene");
+            }
         }
     }
 }
+

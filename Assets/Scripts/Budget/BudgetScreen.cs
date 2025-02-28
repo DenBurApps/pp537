@@ -6,6 +6,7 @@ using Exams;
 using MainScreen;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 [RequireComponent(typeof(ScreenVisabilityHandler))]
 public class BudgetScreen : MonoBehaviour
@@ -21,6 +22,11 @@ public class BudgetScreen : MonoBehaviour
     [SerializeField] private MainScreenView _mainScreenView;
     [SerializeField] private ScheduleScreen.ScheduleScreen _scheduleScreen;
     [SerializeField] private ExamsScreen _examsScreen;
+
+    [Header("Animation Settings")] [SerializeField]
+    private float _animationDuration = 0.3f;
+
+    [SerializeField] private Ease _animationEase = Ease.OutQuad;
 
     private ScreenVisabilityHandler _screenVisabilityHandler;
     private string savePath;
@@ -82,9 +88,20 @@ public class BudgetScreen : MonoBehaviour
 
     private void Start()
     {
+        _addBudgetLimit.gameObject.SetActive(true);
+        _addBudgetLimit.transform.localScale = Vector3.zero;
         _addBudgetLimit.gameObject.SetActive(false);
+
+        _editBudgetLimit.gameObject.SetActive(true);
+        _editBudgetLimit.transform.localScale = Vector3.zero;
         _editBudgetLimit.gameObject.SetActive(false);
+
+        _logSpending.gameObject.SetActive(true);
+        _logSpending.transform.localScale = Vector3.zero;
         _logSpending.gameObject.SetActive(false);
+
+        _budgetHistory.gameObject.SetActive(true);
+        _budgetHistory.transform.localScale = Vector3.zero;
         _budgetHistory.gameObject.SetActive(false);
 
         _screenVisabilityHandler.DisableScreen();
@@ -93,7 +110,7 @@ public class BudgetScreen : MonoBehaviour
         {
             plane.Disable();
         }
-        
+
         Load();
 
         _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
@@ -102,6 +119,10 @@ public class BudgetScreen : MonoBehaviour
     public void Enable()
     {
         _screenVisabilityHandler.EnableScreen();
+        transform.localScale = Vector3.zero;
+        gameObject.SetActive(true);
+        transform.DOScale(Vector3.one, _animationDuration)
+            .SetEase(_animationEase);
     }
 
     private bool ArePlanesAvailable()
@@ -117,20 +138,30 @@ public class BudgetScreen : MonoBehaviour
     private void AddBudget()
     {
         _addBudgetLimit.gameObject.SetActive(true);
+        _addBudgetLimit.transform.localScale = Vector3.zero;
+        _addBudgetLimit.transform.DOScale(Vector3.one, _animationDuration)
+            .SetEase(_animationEase);
     }
 
     private void EnableBudgetPlane(BudgetData data)
     {
+        BudgetPlane targetPlane;
         if (data.IsYearly)
         {
-            _planes[0].Enable(data);
+            targetPlane = _planes[0];
             FirstPlaneActive?.Invoke();
         }
         else
         {
-            _planes[1].Enable(data);
+            targetPlane = _planes[1];
             SecondPlaneActive?.Invoke();
         }
+
+        targetPlane.gameObject.SetActive(true);
+        targetPlane.transform.localScale = Vector3.zero;
+        targetPlane.Enable(data);
+        targetPlane.transform.DOScale(Vector3.one, _animationDuration)
+            .SetEase(_animationEase);
 
         _addBudgetButton.interactable = AllPlanesActive();
         _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
@@ -139,32 +170,40 @@ public class BudgetScreen : MonoBehaviour
 
     private void OpenBudgetHistory(BudgetData data)
     {
+        _budgetHistory.gameObject.SetActive(true);
+        _budgetHistory.transform.localScale = Vector3.zero;
         _budgetHistory.Enable(data);
+        _budgetHistory.transform.DOScale(Vector3.one, _animationDuration)
+            .SetEase(_animationEase);
         Save();
     }
 
     private void EditBudget(BudgetData data)
     {
+        _editBudgetLimit.gameObject.SetActive(true);
+        _editBudgetLimit.transform.localScale = Vector3.zero;
         _editBudgetLimit.EnableScreen(data);
+        _editBudgetLimit.transform.DOScale(Vector3.one, _animationDuration)
+            .SetEase(_animationEase);
         Save();
     }
 
     private void OpenLogSpending(BudgetData data)
     {
+        _logSpending.gameObject.SetActive(true);
+        _logSpending.transform.localScale = Vector3.zero;
         _logSpending.Enable(data);
+        _logSpending.transform.DOScale(Vector3.one, _animationDuration)
+            .SetEase(_animationEase);
         Save();
     }
 
     private void UpdateData(BudgetData data)
     {
-        if (data.IsYearly)
-        {
-            _planes[0].SetData(data);
-        }
-        else
-        {
-            _planes[1].SetData(data);
-        }
+        BudgetPlane targetPlane = data.IsYearly ? _planes[0] : _planes[1];
+
+        targetPlane.SetData(data);
+        targetPlane.transform.DOPunchScale(Vector3.one * 0.1f, _animationDuration, 2, 1f);
 
         _addBudgetButton.interactable = AllPlanesActive();
         Save();
@@ -172,38 +211,61 @@ public class BudgetScreen : MonoBehaviour
 
     private void Delete(BudgetData data)
     {
+        BudgetPlane targetPlane;
         if (data.IsYearly)
         {
-            _planes[0].Disable();
+            targetPlane = _planes[0];
             FirstPlaneDeleted?.Invoke();
         }
         else
         {
-            _planes[1].Disable();
+            targetPlane = _planes[1];
             SecondPlaneDeleted?.Invoke();
         }
 
-        _addBudgetButton.interactable = AllPlanesActive();
-        _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
+        targetPlane.transform.DOScale(Vector3.zero, _animationDuration)
+            .SetEase(_animationEase)
+            .OnComplete(() =>
+            {
+                targetPlane.Disable();
+                _addBudgetButton.interactable = AllPlanesActive();
+                _emptyPlane.gameObject.SetActive(ArePlanesAvailable());
+            });
+
         Save();
     }
 
     private void MainScreenOpen()
     {
-        _screenVisabilityHandler.DisableScreen();
-        _mainScreenView.Enable();
+        transform.DOScale(Vector3.zero, _animationDuration)
+            .SetEase(_animationEase)
+            .OnComplete(() =>
+            {
+                _screenVisabilityHandler.DisableScreen();
+                _mainScreenView.Enable();
+            });
     }
 
     private void ScheduleOpen()
     {
-        _screenVisabilityHandler.DisableScreen();
-        _scheduleScreen.Enable();
+        transform.DOScale(Vector3.zero, _animationDuration)
+            .SetEase(_animationEase)
+            .OnComplete(() =>
+            {
+                _screenVisabilityHandler.DisableScreen();
+                _scheduleScreen.Enable();
+            });
     }
 
     private void ExamsOpen()
     {
-        _examsScreen.Enable();
-        _screenVisabilityHandler.DisableScreen();
+        transform.DOScale(Vector3.zero, _animationDuration)
+            .SetEase(_animationEase)
+            .OnComplete(() =>
+            {
+                _examsScreen.Enable();
+                _screenVisabilityHandler.DisableScreen();
+            });
     }
 
     private void Save()
@@ -214,7 +276,7 @@ public class BudgetScreen : MonoBehaviour
                 .Where(plane => plane.IsActive)
                 .Select(plane => plane.Data)
                 .ToList();
-            
+
             BudgetDataListWrapper dataWrapper = new BudgetDataListWrapper(budgetDataList);
 
             string json = JsonUtility.ToJson(dataWrapper, true);
@@ -227,7 +289,7 @@ public class BudgetScreen : MonoBehaviour
             Debug.LogError($"Failed to save budget data: {e.Message}");
         }
     }
-    
+
     private void Load()
     {
         try
@@ -237,12 +299,12 @@ public class BudgetScreen : MonoBehaviour
                 string json = File.ReadAllText(savePath);
                 BudgetDataListWrapper dataWrapper = JsonUtility.FromJson<BudgetDataListWrapper>(json);
                 List<BudgetData> loadedData = dataWrapper?.Data ?? new List<BudgetData>();
-                
+
                 foreach (var plane in _planes)
                 {
                     plane.Disable();
                 }
-                
+
                 foreach (var data in loadedData)
                 {
                     EnableBudgetPlane(data);
