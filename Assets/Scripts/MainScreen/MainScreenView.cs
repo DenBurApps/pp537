@@ -28,7 +28,6 @@ namespace MainScreen
             _screenVisabilityHandler = GetComponent<ScreenVisabilityHandler>();
             _canvasGroup = GetComponent<CanvasGroup>();
 
-            // Ensure CanvasGroup component exists
             if (_canvasGroup == null)
             {
                 _canvasGroup = gameObject.AddComponent<CanvasGroup>();
@@ -66,15 +65,11 @@ namespace MainScreen
 
                 _canvasGroup.DOFade(1f, _transitionDuration)
                     .SetEase(_transitionEase);
-
-                _canvasGroup.transform.DOScale(1f, _transitionDuration)
-                    .SetEase(_transitionEase);
             }
         }
 
         public void Disable()
         {
-            // Animate screen disable with fade and scale
             if (_canvasGroup != null)
             {
                 _canvasGroup.DOFade(0f, _transitionDuration)
@@ -118,7 +113,6 @@ namespace MainScreen
             Disable();
         }
 
-        // Optional: Method to cancel any running animations
         private void CancelAnimations()
         {
             _canvasGroup?.DOKill();

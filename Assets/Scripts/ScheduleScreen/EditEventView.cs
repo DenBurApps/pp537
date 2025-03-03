@@ -32,7 +32,6 @@ namespace ScheduleScreen
         public event Action<string> NameInputed;
         public event Action<string> NoteInputed;
         public event Action<string> DateInputed;
-        public event Action<string> TimeInputed;
         public event Action ExamClicked;
         public event Action SaveClicked;
         public event Action BackClicked;

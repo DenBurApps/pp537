@@ -12,10 +12,8 @@ public class Onboarding : MonoBehaviour
     [SerializeField] private List<GameObject> _steps;
     [SerializeField] private float _fadeInDuration = 0.5f;
     [SerializeField] private float _fadeOutDuration = 0.3f;
-    [SerializeField] private float _scaleInDuration = 0.5f;
     [SerializeField] private Ease _fadeInEase = Ease.OutQuad;
     [SerializeField] private Ease _fadeOutEase = Ease.InQuad;
-    [SerializeField] private Ease _scaleEase = Ease.OutBack;
     [SerializeField] private MainScreenView _mainScreen;
 
     private int _currentIndex = 0;
@@ -36,7 +34,6 @@ public class Onboarding : MonoBehaviour
                 canvasGroup.alpha = 0f;
             }
 
-            step.transform.localScale = Vector3.zero;
             step.SetActive(false);
         }
 
@@ -90,13 +87,10 @@ public class Onboarding : MonoBehaviour
         }
 
         canvasGroup.alpha = 0f;
-        step.transform.localScale = Vector3.zero;
 
         Sequence sequence = DOTween.Sequence();
 
         sequence.Append(canvasGroup.DOFade(1f, _fadeInDuration).SetEase(_fadeInEase));
-
-        sequence.Join(step.transform.DOScale(Vector3.one, _scaleInDuration).SetEase(_scaleEase));
 
         sequence.Play();
     }
@@ -108,8 +102,6 @@ public class Onboarding : MonoBehaviour
         Sequence sequence = DOTween.Sequence();
 
         sequence.Append(canvasGroup.DOFade(0f, _fadeOutDuration).SetEase(_fadeOutEase));
-
-        sequence.Join(step.transform.DOScale(0.8f, _fadeOutDuration).SetEase(_fadeOutEase));
 
         sequence.OnComplete(() =>
         {

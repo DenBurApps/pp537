@@ -75,8 +75,6 @@ namespace Exams
             _screenVisabilityHandler.EnableScreen();
             DisableAllPlanes();
             var datas = _eventHolder.Datas;
-            
-            Debug.Log(_eventHolder.Datas.Count);
 
             if (datas.Count <= 0)
             {

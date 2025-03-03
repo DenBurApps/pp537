@@ -37,7 +37,6 @@ namespace AssigmentDataInputScreen
         public event Action<string> SubjectInputed;
         public event Action<string> NoteInputed;
         public event Action<string> DateInputed;
-        public event Action<string> TimeInputed;
         public event Action AddStepClicked;
         public event Action AddSourceClicked;
         public event Action SaveClicked;

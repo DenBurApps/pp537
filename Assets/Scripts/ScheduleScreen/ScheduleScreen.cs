@@ -29,7 +29,6 @@ namespace ScheduleScreen
         [SerializeField] private float _fadeInDuration = 0.5f;
         [SerializeField] private float _fadeOutDuration = 0.3f;
         [SerializeField] private float _scaleInDuration = 0.4f;
-        [SerializeField] private float _moveInDuration = 0.6f;
         [SerializeField] private float _staggerDelay = 0.1f;
         [SerializeField] private Ease _fadeEase = Ease.OutQuad;
         [SerializeField] private Ease _scaleEase = Ease.OutBack;
